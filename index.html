@@ -291,6 +291,7 @@ textarea.code{width:100%;height:70px;background:#120c1e;color:#cbbde3;border:1px
 <div class="screen" id="endScr">
   <div class="logo" style="font-size:clamp(30px,7vw,56px)">THE END</div>
   <div class="tag" id="endTxt"></div>
+  <button class="btn" id="endNew" style="border-color:#b06aff">🌍 Enter the New World (Chapter 21)</button>
   <button class="btn" id="endCont">Keep Playing (New Game+)</button>
   <button class="btn ghost" id="endTitle">Return to Title</button>
 </div>
@@ -809,6 +810,303 @@ for(const k in CLASSES){const C=CLASSES[k];C.sk.forEach((s,i)=>{s.job=0;s.req=[0
 // monster element by land: [weak to, resists]
 const LAND_EL={fields:['fire','earth'],woods:['fire','wind'],mire:['fire','earth'],watchtower:['lightning','shadow'],desert:['ice','fire'],tomb:['holy','shadow'],volcano:['ice','fire'],bridge:['lightning','earth'],frost:['fire','ice'],glacier:['fire','ice'],monastery:['shadow','holy'],spine:['fire','ice'],marsh:['lightning','earth'],capital:['lightning','holy'],catacomb:['holy','shadow'],storm:['earth','wind'],walls:['lightning','earth'],court:['holy','shadow'],throne:['holy','shadow'],rift:['holy','shadow']};
 SPK.JM=['Job Master Orin','🎓'];
+/* ================= NEW WORLD ARC · ELDORIA · CHAPTERS 21-50 ================= */
+// speakers
+Object.assign(SPK,{W:['Wensly','🛡️'],KE:['Kendra','👑'],LU:['Lucas','⚔️'],ET:['Ethan','🔮'],KM:['Kamara','🗡️'],KI:['Kim','😜'],IS:['Isaac','🔥'],
+ AU:['Aurora','🧝‍♀️'],RG:['Reginaldo','🧝‍♂️'],AV:['Ava','👸'],IK:['Ishkafar','🌌'],ART:['King Arthur','👑'],MOHG:['Mohg, the Blasphemy King','🩸'],IFR:['King Ifrit','🔥'],
+ DIA:['The Diamond King','💎'],VES:['The Twilight King','🌆'],ZEN:['The Sky King','☁️'],VAL:['The Iron King','⚙️'],SYL:['The Shadow King','🌑'],ICE:['The Ice King','❄️'],DRA:['The Dragon King','🐉']});
+ACTS.push('Act VI · Eldoria: The Journey Begins','Act VII · The Ancient Secrets','Act VIII · The Kingdoms of Eldoria','Act IX · The Forbidden Territory','Act X · A New Dawn');
+function actOf(c){return c<20?Math.floor(c/4):c<25?5:c<30?6:c<40?7:c<48?8:9;}
+
+/* ---- kingdom lands (built from the existing land styles) ---- */
+const bc=(base,o)=>Object.assign({},B[base],o);
+Object.assign(B,{
+ eldrift:bc('rift',{sky:[0x1a0a3a,0x6a4aa8],fog:[30,100],g1:0x2a2a4a,g2:0x1e1e36,hs:0xb8a0ff,night:0,stars:1}),
+ frontier:bc('fields',{sky:[0xd89a6a,0xf8d8b0],g1:0x7a8a4a,g2:0x5a6a38,sun:[0xffc890,1,[30,25,20]],pc:0xffd8a0}),
+ arthur:bc('monastery',{sky:[0xe8c88a,0xfff2d0],g1:0xc8b878,g2:0xa89858,sun:[0xfff0c0,1.15,[20,50,20]],pc:0xffe8a0}),
+ cathedral:bc('court',{sky:[0x1a0608,0x6a1a1a],g1:0x2a1010,g2:0x1a0808,hs:0xff8a8a,sun:[0xff4a4a,.7,[0,40,20]],pc:0xff3a3a}),
+ mohg:bc('throne',{sky:[0x14020a,0x8a0a1a],g1:0x2a0a10,g2:0x3a0a14,sun:[0xff2a3a,.85,[10,40,10]],pc:0xff2a3a}),
+ archive:bc('capital',{sky:[0x0a1030,0x3a4a8a],g1:0x2a3048,g2:0x1e2438,hs:0x9ab0ff,sun:[0x8aa8ff,.75,[-20,40,10]],pc:0x8aa8ff,glowP:1}),
+ ifrit:bc('volcano',{sky:[0x5a1a08,0xff8a3a],sun:[0xffa050,1,[-20,40,10]],pc:0xffaa3a}),
+ elven:bc('woods',{sky:[0x2a5a6a,0xa8e8d8],g1:0x2f6a4a,g2:0x225238,hs:0xc8ffe8,sun:[0xd8fff0,.85,[10,45,10]],pc:0xaaffee}),
+ diamble:bc('glacier',{sky:[0x3a8ab8,0xd8f8ff],g1:0x9ad8e8,g2:0x6ab8d0,water:0,pc:0xaef8ff,sun:[0xe8ffff,1.1,[30,50,0]]}),
+ memory:bc('monastery',{sky:[0xf0e0c8,0xfff8ec],fog:[25,90],g1:0xd8d0b8,g2:0xb8b098,pc:0xfff2d0,ps:.3,glowP:1}),
+ vesper:bc('court',{sky:[0x3a1a4a,0xd88a6a],g1:0x3a2a40,g2:0x2a1e32,sun:[0xffa070,.85,[-40,20,0]],night:0,pc:0xffb080}),
+ zenith:bc('storm',{sky:[0x6aa8e8,0xe8f4ff],g1:0x8a9ab0,g2:0x6a7a90,hs:0xffffff,sun:[0xffffff,1.1,[20,60,10]],pc:0xffffff,amp:4.2}),
+ valdran:bc('walls',{sky:[0x3a3a42,0x8a8a92],g1:0x4a4a52,g2:0x3a3a42,hs:0xd8d8e0,sun:[0xffd0a0,.8,[30,35,-10]],night:0,pc:0xffa040}),
+ sylthar:bc('catacomb',{sky:[0x05030a,0x1e0e2e],g1:0x1e1626,g2:0x140e1a,pc:0x8a4aff}),
+ auroraice:bc('frost',{sky:[0x0a2a3a,0x4ad8a8],g1:0x9ab8c8,g2:0x7a98a8,night:1,pc:0x7affd8,glowP:1,sun:[0x9affe8,.6,[10,40,10]]}),
+ draken:bc('volcano',{sky:[0x1a0404,0x6a1008],g1:0x2a1412,g2:0x1a0a08,sun:[0xff3a1a,.8,[0,40,10]],pc:0xff4a1a}),
+ alliance:bc('capital',{sky:[0x4a2a3a,0xd8a080],sun:[0xffb080,.85,[-30,25,0]],pc:0xffd0a0}),
+ forbid:bc('rift',{sky:[0x0a0010,0x3a0a2a],g1:0x1a0a14,g2:0x12060e,pc:0xff4aaa}),
+ gravity:bc('rift',{sky:[0x02000a,0x2a1a5a],amp:4.5,pc:0x9a8aff,ps:.45}),
+ oathland:bc('monastery',{sky:[0x5a7a6a,0xe8f0d8],g1:0x8aa878,g2:0x6a8858,pc:0xd8ffd0}),
+ forbidgate:bc('walls',{sky:[0x0a0010,0x4a1a5a],pc:0xb04aff}),
+ dawn:bc('fields',{sky:[0xffb080,0xfff0d8],sun:[0xffd8a0,1.2,[40,18,10]],pc:0xffe8b0,g1:0x6aa04a}),
+});
+/* ---- monsters of Eldoria ---- */
+const mc=(base,o)=>Object.assign({},MOBS[base],o);
+Object.assign(MOBS,{
+ riftjelly:mc('blob',{n:'Rift Jelly',col:0x8a4aff,em:0x6a1aff,loot:['Rift Gel','🟣']}),
+ voidhound:mc('wolf',{n:'Void Hound',col:0x2a1a4a,em:0x8a2aff,loot:['Void Fang','🦷']}),
+ bandit:mc('hollow',{n:'Eldorian Bandit',col:0x6a4a2a,loot:['Stolen Coin','🪙']}),
+ banditarcher:mc('archer',{n:'Bandit Archer',col:0x5a4a2a,loot:['Fletching','🪶']}),
+ sentry:mc('royalguard',{n:'Arthurian Sentry',col:0xd8b04a,loot:['Golden Crest','🛡️']}),
+ cherub:mc('imp',{n:'Fallen Cherub',col:0xf0e0c0,em:0xfff2a0,loot:['Torn Halo','😇']}),
+ acolyte:mc('monk',{n:'Blood Acolyte',col:0x8a1a2a,loot:['Blood Rosary','📿']}),
+ bloodknight:mc('darkknight',{n:'Blood Knight',col:0x5a0a14,em:0xff1a3a,loot:['Blood Sigil','🩸']}),
+ tome:mc('lantern',{n:'Living Tome',col:0x6a8aff,loot:['Torn Page','📄']}),
+ spellgolem:mc('golem',{n:'Spell Golem',col:0x4a5a9a,em:0x6a8aff,loot:['Rune Core','🔷']}),
+ ifritspawn:mc('imp',{n:'Ifrit Spawn',col:0xff6a1a,loot:['Living Ember','🔥']}),
+ magmaknight:mc('lavagolem',{n:'Magma Knight',col:0x6a2a1a,loot:['Molten Plate','🌋']}),
+ sprite:mc('lantern',{n:'Forest Sprite',col:0x9affc8,loot:['Sprite Dust','✨']}),
+ elfguard:mc('archer',{n:'Elven Sentinel',col:0x8ad8a8,loot:['Elven Arrow','🏹']}),
+ diamondgolem:mc('golem',{n:'Diamond Golem',col:0xbfefff,em:0x9fe8ff,loot:['Raw Diamond','💎']}),
+ prismbat:mc('bat',{n:'Prism Bat',col:0xaee8ff,loot:['Prism Wing','🦇']}),
+ memwisp:mc('lantern',{n:'Memory Wisp',col:0xfff2d0,loot:['Faded Memory','🕯️']}),
+ duskstalker:mc('vampire',{n:'Dusk Stalker',col:0x4a2a5a,loot:['Dusk Fang','🌆']}),
+ zenithhawk:mc('stormbird',{n:'Zenith Hawk',col:0x9ac8ff,loot:['Sky Feather','🪶']}),
+ cloudspirit:mc('lantern',{n:'Cloud Spirit',col:0xe8f4ff,loot:['Cloud Wisp','☁️']}),
+ ironlegion:mc('hollow',{n:'Iron Legionnaire',col:0x7a7a82,hpM:1.4,loot:['Iron Gear','⚙️']}),
+ cogspider:mc('spider',{n:'Cog Spider',col:0x8a7a5a,loot:['Brass Cog','⚙️']}),
+ shade:mc('wraith',{n:'Sylthar Shade',col:0x1a1026,em:0x6a1aff,loot:['Shadow Silk','🌑']}),
+ frostfang:mc('wolf',{n:'Frost Fang',col:0xd8f0ff,loot:['Ice Fang','❄️']}),
+ drakeling:mc('wyvern',{n:'Drakeling',col:0xc83a1a,loot:['Drake Scale','🐉']}),
+ dragonknight:mc('royalguard',{n:'Dragon Knight',col:0x8a2a1a,em:0xff4a1a,loot:['Dragon Crest','🛡️']}),
+ gravwisp:mc('lantern',{n:'Gravity Wisp',col:0xb06aff,em:0x8a4aff,loot:['Gravity Mote','🌀']}),
+ voidtemplar:mc('darkknight',{n:'Void Templar',col:0x1a0a2a,em:0x8a2aff,loot:['Void Sigil','🟣']}),
+ soulwisp:mc('wraith',{n:'Soul Wisp',col:0xd8c8ff,loot:['Lost Soul','👻']}),
+ chainanchor:{n:'Chain Anchor',m:'golem',col:0x5a5a62,em:0xc8c8ff,s:1.4,spd:0,r:1.2,hpM:3,atkM:.01,shield:0,loot:['Broken Chain','⛓️']},
+});
+/* ---- kings, guardians and Ishkafar ---- */
+Object.assign(BOSSES,{
+ riftsentinel:{n:'Rift Sentinel',m:'golem',col:0x3a1a5a,s:2.4,spd:2.2,r:2.4,sp:['slam','nova','bolts','sweep'],em:0x8a2aff,roar:'deep'},
+ frontguard:{n:'Corrupted Frontier Guardian',m:'bigknight',col:0x5a4a3a,s:2.2,spd:2.8,r:1.9,sp:['sweep','slam','combo','charge'],shield:1,em:0x8a2aff,roar:'deep'},
+ kingarthur:{el:['shadow','holy'],n:'King Arthur',m:'bigknight',col:0xd8b04a,s:2.3,spd:3,r:1.9,sp:['combo','sweep','jump','charge','cross'],em:0xfff2a0,roar:'deep'},
+ blasherald:{el:['holy','shadow'],n:'Herald of Blasphemy',m:'demon',col:0x6a1a1a,s:2.1,spd:3,r:2,sp:['slam','bolts','combo','nova'],em:0xff2a2a,roar:'demon'},
+ mohg:{el:['holy','fire'],n:'Mohg, the Blasphemy King',m:'demon',col:0x5a0a14,s:2.8,spd:3,r:2.4,sp:['slam','nova','rain','combo','sweep','jump','summon'],em:0xff1a3a,roar:'demon'},
+ archguard:{el:['lightning','earth'],n:'Archive Guardian',m:'golem',col:0x2a3a6a,s:2.4,spd:2.2,r:2.4,sp:['bolts','nova','slam','spiral'],em:0x6a8aff,roar:'deep'},
+ ifrit:{el:['ice','fire'],n:'King Ifrit, the Fire King',m:'oni',col:0xc83a1a,s:2.7,spd:2.8,r:2.2,sp:['combo','slam','rain','meteor','charge'],em:0xff6a1a,roar:'grunt'},
+ ancientguard:{el:['fire','earth'],n:'The Ancient Guardian',m:'treant',col:0x8a8a7a,s:1.7,spd:2.2,r:2.4,sp:['slam','roots','nova','cross'],em:0x9affc8,roar:'deep'},
+ diamondking:{el:['earth','ice'],n:'The Diamond King',m:'golem',col:0x9fe8ff,s:2.6,spd:2.2,r:2.5,sp:['slam','bolts','cross','sweep','nova'],em:0x6fd8ff,shield:1,roar:'deep'},
+ memsentinel:{el:['holy','shadow'],n:'The Memory Sentinel',m:'wraith',col:0xe8e0d0,s:2.4,spd:2.8,r:2,sp:['bolts','spiral','nova','roots'],roar:'whisper'},
+ twilightking:{el:['holy','shadow'],n:'The Twilight King',m:'vampire',col:0x3a1a4a,s:2.4,spd:3.6,r:1.8,sp:['combo','jump','charge','bolts','spiral'],roar:'whisper'},
+ skyking:{el:['earth','wind'],n:'The Sky King',m:'bat',col:0x8ab0e8,s:3.6,spd:4.4,r:2.4,sp:['jump','charge','bolts','rain','sweep'],fly:1,roar:'screech'},
+ ironking:{el:['lightning','earth'],n:'The Iron King',m:'bigknight',col:0x6a6a72,s:2.6,spd:2.6,r:2,sp:['sweep','slam','combo','charge','cross'],shield:1,em:0x9a9aaa,roar:'deep'},
+ shadowking:{el:['holy','shadow'],n:'The Shadow King',m:'wraith',col:0x1a1026,s:2.6,spd:3,r:2,sp:['bolts','spiral','summon','cross','nova'],em:0x6a1aff,roar:'whisper'},
+ iceking:{el:['fire','ice'],n:'The Ice King',m:'dragon',col:0xbfe8ff,s:1.7,spd:3,r:2.6,sp:['nova','bolts','meteor','sweep','rain'],em:0x6fd8ff,roar:'dragon'},
+ dragonking:{el:['ice','fire'],n:'The Dragon King',m:'dragon',col:0x8a1a10,s:1.9,spd:3.2,r:2.8,sp:['slam','meteor','rain','sweep','jump','nova'],em:0xff4a1a,roar:'dragon'},
+ traitor:{n:'Commander Vorn, the Traitor',m:'bigknight',col:0x2a2a30,s:2.3,spd:3.2,r:1.9,sp:['combo','charge','sweep','jump'],em:0xff3a3a,roar:'deep'},
+ warden:{n:'Warden Gaol',m:'oni',col:0x4a4a52,s:2.6,spd:2.6,r:2.2,sp:['slam','charge','combo','roots'],em:0x8a8aff,roar:'grunt'},
+ royalguardian:{el:['shadow','holy'],n:'The Last Royal Guardian',m:'bigknight',col:0xe8e0d0,s:2.4,spd:3,r:1.9,sp:['combo','sweep','cross','nova','jump'],em:0xfff2a0,shield:1,roar:'deep'},
+ gatekeeper:{el:['holy','shadow'],n:'The Forbidden Gatekeeper',m:'golem',col:0x2a2238,s:2.8,spd:2.2,r:2.6,sp:['slam','sweep','cross','rain','charge'],em:0xb04aff,roar:'deep'},
+ // Forbidden Territory: co-op encounters (mech = the teamwork rule)
+ twinkael:{n:'Executioner Kael',m:'bigknight',col:0x8a1a1a,s:2.1,spd:3.2,r:1.8,sp:['combo','charge','sweep','jump'],em:0xff3a3a,roar:'deep',mech:{t:'twin',need:2}},
+ twinseth:{n:'Executioner Seth',m:'bigknight',col:0x1a2a8a,s:2.1,spd:3.2,r:1.8,sp:['combo','bolts','sweep','cross'],em:0x3a6aff,roar:'deep',mech:{t:'twin',need:2}},
+ chaincolossus:{n:'The Colossus of Chains',m:'colossus',col:0x4a4a52,s:2.8,spd:1.8,r:2.6,sp:['slam','cross','rain','sweep','combo'],em:0xc8c8ff,roar:'deep',mech:{t:'chains',need:3}},
+ soulqueen:{el:['holy','shadow'],n:'The Soul Queen',m:'seraph',col:0x6a4a8a,s:2.4,spd:3.2,r:2,sp:['spiral','bolts','rain','cross'],em:0xd06aff,fly:1,roar:'whisper',mech:{t:'channel',need:3}},
+ calflame:{el:['ice','fire'],n:'Calamity of Flame',m:'golem',col:0x5a1a0a,s:2.2,spd:2.6,r:2.2,sp:['slam','rain','nova'],em:0xff5a1a,roar:'deep',mech:{t:'trio',need:3}},
+ calfrost:{el:['fire','ice'],n:'Calamity of Frost',m:'golem',col:0x9fd8ff,s:2.2,spd:2.6,r:2.2,sp:['slam','bolts','spiral'],em:0x6fd8ff,roar:'deep',mech:{t:'trio',need:3}},
+ calstorm:{el:['earth','lightning'],n:'Calamity of Storms',m:'golem',col:0x3a4a6a,s:2.2,spd:2.6,r:2.2,sp:['slam','cross','bolts'],em:0xffe14d,roar:'deep',mech:{t:'trio',need:3}},
+ sealwarden:{n:'The Seal Warden',m:'colossus',col:0x8a7a3a,s:2.6,spd:2,r:2.5,sp:['slam','spiral','cross','nova'],em:0xffd76a,roar:'deep',mech:{t:'seals',need:5}},
+ trialchamp:{n:'Champion of Trials',m:'bigknight',col:0xa82a2a,s:2.4,spd:3,r:1.9,sp:['combo','sweep','jump','charge','cross'],em:0xffb040,roar:'deep',mech:{t:'sync',need:3}},
+ gravchamp:{n:'The Gravity-Forged Champion',m:'demon',col:0x2a1a3a,s:2.5,spd:3,r:2.2,sp:['grav','slam','rain','combo','spiral'],em:0x8a4aff,roar:'demon',mech:{t:'sync',need:2}},
+ jailer:{n:'Ishkafar\'s Jailer',m:'oni',col:0x2a2a3a,s:2.7,spd:2.6,r:2.3,sp:['slam','charge','roots','combo','grav'],em:0x6a6aff,roar:'grunt',mech:{t:'sync',need:3}},
+ ishkafar:{n:'Ishkafar, the Dark Wizard',m:'pharaoh',col:0x1a0a2a,s:2.7,spd:3,r:2.2,robe:1,sp:['grav','rain','spiral','cross','bolts','nova','summon','grav'],em:0x8a4aff,roar:'demon',final:1,mech:{t:'sync',need:5}},
+});
+/* ---- chapters 21-50 ---- */
+const NPC_={W:{n:'Wensly',ic:'🛡️',hat:'helm',col:0x8a8a9a},KE:{n:'Kendra',ic:'👑',hat:'crown',col:0xd8b04a},LU:{n:'Lucas',ic:'⚔️',hat:'helm',col:0x6a4a2a},ET:{n:'Ethan',ic:'🔮',hat:'wizard',col:0x2a4aa8},
+ KM:{n:'Kamara',ic:'🗡️',hat:'cap',col:0x7a3a5a},KI:{n:'Kim',ic:'😜',hat:'wrap',col:0xc83a3a},IS:{n:'Isaac',ic:'🔥',hat:'helm',col:0xa82a2a},AU:{n:'Aurora',ic:'🧝‍♀️',hat:'crown',col:0xd8e8f0},
+ RG:{n:'Reginaldo',ic:'🧝‍♂️',hat:'hood',col:0xe8e0c8},EM:{n:'Echo of {M}',ic:'🕯️',hat:'hood',col:0xfff2d0}};
+const L_=a=>a.map(x=>[x[0],x[1]]);
+const CH=(name,b,mobs,boss,npc,quest,intro,qs,qp,qd,outro)=>({name,b,mobs,boss,npc:NPC_[npc],quest,intro:L_(intro),qs:L_(qs),qp:L_(qp),qd:L_(qd),outro:L_(outro)});
+CHS.push(
+CH('Beyond Lumen','eldrift',['riftjelly','voidhound','gravwisp'],'riftsentinel','W',{t:'hunt',mob:'voidhound',n:12,title:'Echoes of the Rift'},
+ [['N','Malgrath was gone. But the Void Rift never truly closed.'],['N','Its last light folded into a passage, and beyond it lay an ancient continent: Eldoria, the New World.'],['P','{H}... do you feel that? Something is pulling at the rift.'],['W','Heroes of Lumen! Forgive me for coming like this. I am Wensly, a knight of Eldoria.'],['W','Our Empress, Ava, has been taken by Ishkafar, a Dark Wizard who bends gravity itself. I came through the rift to find the ones who defeated Malgrath.']],
+ [['W','Void Hounds crossed with you. If we leave them, they will hunt the villages on this shore.'],['KE','Then we kill them. All of them. I am not standing still while my sister is in chains.'],['W','This is Kendra, Ava\'s younger sister. Slay twelve Void Hounds, and I will show you the road.']],
+ [['KE','Twelve hounds. Every one we slay is one step closer to Ava.']],
+ [['W','Well fought. The rift\'s guardian blocks the way inland. It is a Rift Sentinel, born from what Malgrath left behind.'],['KE','Then let\'s break it.']],
+ [['W','The shore is safe. Beyond it lies the frontier, and the first of Eldoria\'s ten kingdoms.'],['P','We came to save the world once, {H}. I guess we do it again.']]),
+CH('The Empress Taken','frontier',['bandit','banditarcher','voidhound'],'frontguard','LU',{t:'gather',mob:'bandit',item:'Stolen Supply Crate',n:8,title:'The Frontier\'s Burden'},
+ [['N','The frontier town of Ashveil stood half-empty. Its people whispered about the night the sky turned upside down.'],['KE','This is where they took her. Ava stopped here to protect the townsfolk... and Ishkafar lifted her into the sky like a feather.'],['LU','Hey! You there, are you the heroes from the rift? Name\'s Lucas. Future greatest warrior of the New World!']],
+ [['LU','Bandits took the town\'s supplies the moment the guards fell. Help me get them back, and I\'ll prove I\'m worth taking along!'],['LU','Eight crates. The bandits stuffed them in their camps all over the hills.']],
+ [['LU','Keep going! I counted three crates near the old mill.']],
+ [['LU','That\'s all of them! Now the real problem: the Frontier Guardian. Ishkafar\'s magic turned him against us. He guards the road to the kingdoms.'],['W','Free him from that curse, and the road is ours. Lucas, stay behind them.'],['LU','Behind? I\'m going first!']],
+ [['W','The guardian\'s heart held this. An Eldorian Seal. The kingdoms will open their gates to whoever carries it.'],['LU','So... I\'m coming with you, right? Right?'],['P','Ha. Welcome to the team, Lucas.']]),
+CH('Castle Arthur','arthur',['sentry','cherub','bandit'],'kingarthur','KM',{t:'hunt',mob:'cherub',n:12,title:'The Golden Court'},
+ [['N','Castle Arthur rose above the clouds of gold, the oldest kingdom of Eldoria.'],['KM','Stop! I mean, hello. I am Kamara. I am going to be a knight of this castle one day.'],['KM','But something is wrong. The angels of the court have fallen, and King Arthur no longer opens his doors.']],
+ [['KM','The Fallen Cherubs attack anyone who comes near the throne. Real knights protect people. Help me clear twelve of them?'],['KM','I will stay close. I am not scared. Mostly.']],
+ [['KM','Watch their dive. They telegraph it, just like a duel.']],
+ [['KM','The doors are opening! King Arthur will see you... but he will test you first. He tests everyone.'],['ART','Strangers from beyond the rift. If you would walk my kingdoms, prove your blade is worthy of Eldoria.']],
+ [['ART','Enough. You fight like those who have lost something precious.'],['ART','I was too proud to see it. Ishkafar\'s gravity is crushing the old royal order, one throne at a time. The Blasphemy King of Castle Mohg was the first to kneel to him.'],['KM','Your Majesty... may I go with them?'],['ART','Go, young one. Learn what it means to protect others. That is what makes a knight.']]),
+CH('The Blasphemy Throne','cathedral',['acolyte','bloodknight','cherub'],'blasherald','KI',{t:'shrines',n:3,title:'Desecrated Altars'},
+ [['N','The road east led to a cathedral drowned in red light.'],['KI','Boo! Ha! You should\'ve seen your face. I\'m Kim. I scout these ruins for fun.'],['KI','But nothing\'s been fun since the acolytes came. They worship the Blasphemy King, Mohg.']],
+ [['KI','Three altars around the cathedral feed blood magic to Mohg\'s castle. Light the holy flames on them, and his herald will come out to stop us!'],['KI','I\'ll throw rocks at the acolytes. That\'s helping. Totally.']],
+ [['KI','Two more altars! I left marks on the trees so you won\'t get lost. You\'re welcome.']],
+ [['KI','The altars are burning clean! Uh-oh. Something big is coming out of the cathedral.'],['W','The Herald of Blasphemy. Mohg\'s voice in the world. Be careful.']],
+ [['W','The herald carried a letter, sealed with gravity runes. Ishkafar wrote it. He promised Mohg the throne of the Empress in exchange for his loyalty.'],['KE','So the kings are being bought... or broken.'],['KI','I\'m coming too. You need someone fun on this team.']]),
+CH('Castle Mohg','mohg',['bloodknight','acolyte','voidhound'],'mohg','W',{t:'survive',time:60,title:'The Blood Siege'},
+ [['N','Castle Mohg. The first kingdom to fall to Ishkafar\'s promises.'],['MOHG','Little lambs from beyond the rift. You walk into my house carrying the Empress\'s hope?'],['MOHG','Ishkafar promised me her crown. I only need to drown this land in blood first.']],
+ [['W','The castle\'s blood beacon calls his knights from every hill. Light our counter-beacon by the walls and hold until the siege breaks.'],['W','After every ruler you defeat, we learn more of Ishkafar\'s plan. Mohg knows a great deal.']],
+ [['W','Hold the line at the beacon. The knights will break against it.']],
+ [['W','The siege is broken. Mohg is alone now. Steel yourselves; the Blasphemy King does not fight with honor.']],
+ [['MOHG','Ishkafar... you promised...'],['W','Look here. Mohg\'s records. Ishkafar is gathering power from every kingdom he breaks, storing it somewhere in the deep lands.'],['W','We need someone who understands gravity magic. There is a young mage at the Grand Archive.']]),
+CH('The Mage\'s Archive','archive',['tome','spellgolem','gravwisp'],'archguard','ET',{t:'gather',mob:'tome',item:'Gravity Codex Page',n:10,title:'Pages of Gravity'},
+ [['N','The Grand Archive held every spell ever written in Eldoria, and one very tired mage.'],['ET','Oh! Visitors. Please don\'t touch the floating books, they bite. I\'m Ethan.'],['ET','I have spent three years studying one thing: how Ishkafar bends gravity. And I think I am close.']],
+ [['ET','The Living Tomes stole the pages of the Gravity Codex. Ten pages. With them I can explain how his magic works.'],['ET','Please be gentle with the books. They\'re... well, they\'re attacking you, but still.']],
+ [['ET','Each page is a piece of the formula. I need them all.']],
+ [['ET','I see it now. Ishkafar\'s gravity can\'t be broken by one strike, however strong. Only by many strikes landing at the same moment.'],['ET','Remember that. It will matter at the end. Now, the Archive Guardian has awakened. It guards the deepest shelves.']],
+ [['ET','The guardian kept a map of the deep lands! The Forbidden Territory. That is where Ishkafar hides.'],['ET','I\'m coming with you. Someone has to keep you from walking into a gravity trap.'],['LU','Finally, a mage on the team!']]),
+CH('Castle Ifrit','ifrit',['ifritspawn','magmaknight','imp'],'ifrit','IS',{t:'hunt',mob:'ifritspawn',n:15,title:'Embers of the Fire King'},
+ [['N','Castle Ifrit burned day and night, its king made of living flame.'],['IS','You must be the ones Wensly talks about. I\'m Isaac. I protect the villages at the foot of this volcano.'],['IS','Ifrit\'s spawn are burning the farms. My friends and I can\'t hold them alone.']],
+ [['IS','Fifteen of the Ifrit Spawn. If we drive them back, the villagers can escape.'],['IS','Lucas, Kim, Kamara, follow my lead! Ethan, cover us!'],['KI','Who made him the boss?'],['KM','He did. And honestly... it works.']],
+ [['IS','Keep pushing! Don\'t let them reach the farms!']],
+ [['IS','The villages are safe. Now the king himself. He has not been the same since Ishkafar visited.']],
+ [['IFR','My flames... they were never mine to give away...'],['IS','He\'s free of the curse. The Fire King gave us a Flame Ward. It will protect us in the deep lands.'],['W','Isaac. You lead well. The young ones listen to you.']]),
+CH('The Elven Sanctuary','elven',['sprite','elfguard','frostfang'],'ancientguard','AU',{t:'shrines',n:3,title:'The Three Moon Wells'},
+ [['N','Hidden in an endless forest was the Elven Sanctuary, older than any kingdom.'],['AU','We have waited a long time for you, children of Lumen. I am Aurora.'],['RG','And I am Reginaldo. We are the Grand Elders. We remember what the kingdoms have forgotten.']],
+ [['AU','Rekindle the three Moon Wells around the sanctuary. When they shine, we will open the memory of Eldoria to you.'],['RG','The forest\'s guardians will test you. Do not hate them; they only protect what is sacred.']],
+ [['AU','The wells answer only to those who keep going.']],
+ [['RG','The wells shine again. Now the Ancient Guardian awakens. It must judge whether you are ready for the truth.']],
+ [['AU','You are ready. Ishkafar\'s power is older than the kingdoms: gravity, the force that holds the world together.'],['RG','He wants the Empress because her bloodline anchors the ten kingdoms. With Ava, he could pull the whole continent into his hand.'],['RG','And there is more. Something about your own past, children. But you must find it yourselves. Go to Castle Diamble first.']]),
+CH('Castle Diamble','diamble',['diamondgolem','prismbat','frostfang'],'diamondking','KE',{t:'gather',mob:'diamondgolem',item:'Prism Key Fragment',n:8,title:'The Prism Key'},
+ [['N','Castle Diamble shone like a frozen star, its walls made of living diamond.'],['KE','Ava loved this place. She said the Diamond King was the only ruler who never lied to her.'],['KE','But now his gates are sealed with crystal, and I can hear something crying inside.']],
+ [['KE','The Prism Key was shattered and sewn into the Diamond Golems. We need eight fragments to open the gate.'],['KE','I know I\'m not as strong as you yet. But I will not fall behind. Not this time.']],
+ [['KE','Keep going. Ava never gave up on anyone. I won\'t give up on her.']],
+ [['KE','The gate is open. The Diamond King... his armor reflects attacks. Hit him when he\'s winding up.']],
+ [['DIA','Kendra... little princess... forgive me. He made me watch them...'],['KE','Watch who? What did he make you watch?'],['DIA','The two women from beyond the rift. Long ago. Ishkafar came for their children, and they stood in his way...'],['P','{H}... he\'s talking about our mothers.']]),
+CH('The Lost Memories','memory',['memwisp','soulwisp','gravwisp'],'memsentinel','EM',{t:'shrines',n:3,title:'Fragments of the Past'},
+ [['N','Beyond Diamble lay a quiet field where memories drifted like snow.'],['P','I remember now. The night our mothers didn\'t come home. Everyone said it was a storm.'],['N','A soft light took shape in the field. A gentle voice, from very long ago.'],['EM','My child... if this memory reaches you, then you have grown strong.']],
+ [['EM','This is only an echo, a piece of me the field held onto. Light the three keepsake lanterns, and I will show you what happened.'],['N','The echo was warm, but it was only a memory. {M} and {PM} were gone.']],
+ [['EM','Find the lanterns. Each one holds a moment I wanted you to see.']],
+ [['EM','Ishkafar came to Lumen for you two. He felt the starlight in your hearts, even as babies.'],['EM','{PM} and I stood in front of your cradles. We could not defeat him... but we hid you from his sight. It was enough.'],['EM','Something guards this memory and will not let it go. Be brave, my child. Like we were.']],
+ [['EM','You are free to remember now. Never carry our deaths as a weight. Carry our love as a sword.'],['P','Mom...'],['N','The echo faded into light. {H} and {P} stood together for a long while before anyone spoke.'],['IS','Then we fight for them too. For Essa and Liza. Every one of us.']]),
+CH('Castle Vesper','vesper',['duskstalker','soulwisp','bloodknight'],'twilightking','W',{t:'hunt',mob:'duskstalker',n:15,title:'The Endless Dusk'},
+ [['N','In Castle Vesper the sun had been setting for seven years and never went down.'],['VES','A kingdom without night or day. Isn\'t it beautiful? Ishkafar froze my sun, and in return I never grow old.']],
+ [['W','The Dusk Stalkers hunt anyone who walks in the twilight. Thin their numbers and the king will have to face us.'],['W','Ethan says Vesper\'s frozen sun is feeding power to the Forbidden Territory.']],
+ [['W','Stay in the light. The stalkers are strongest in the shadows.']],
+ [['W','The Twilight King waits on his balcony. He moves faster than his shadow. Watch his dives.']],
+ [['VES','The sun... it\'s finally setting...'],['ET','Vesper\'s stored power just vanished. It flowed east, toward the sky. Toward Castle Zenith.']]),
+CH('Castle Zenith','zenith',['zenithhawk','cloudspirit','prismbat'],'skyking','KI',{t:'gather',mob:'zenithhawk',item:'Sky Feather',n:10,title:'Wings of Zenith'},
+ [['N','Castle Zenith floated above the clouds, held up by Ishkafar\'s gravity.'],['KI','Woooow! We\'re walking on clouds! Okay, nobody push me.'],['KI','I scouted ahead. The Sky King\'s hawks carry the feathers that keep the bridges up. We need them to reach his tower.']],
+ [['KI','Ten Sky Feathers! And no, I\'m not afraid of heights. That shaking is excitement.']],
+ [['KI','Grab the feathers before they float away!']],
+ [['KI','The bridge to the Sky King is up! Careful, he dives like a storm.']],
+ [['ZEN','The ground... finally calls me back...'],['KI','I\'ll admit it. That was scary. But I\'d do it again with you guys.'],['W','Two kingdoms freed in a row. The people are starting to believe again.']]),
+CH('Castle Valdran','valdran',['ironlegion','cogspider','ironlegion'],'ironking','LU',{t:'survive',time:60,title:'The Iron March'},
+ [['N','Castle Valdran never stopped working. Its forges built armies for whoever paid.'],['LU','The Iron King\'s legion is marching on the free villages. Ishkafar bought every soldier.'],['LU','This is it. The kind of fight I always dreamed about. Let me show you what I can do.']],
+ [['LU','We light the warning beacon at the ridge and hold until the villages evacuate. Nobody gets past us.'],['LU','Stand with me. No retreat.']],
+ [['LU','Hold the ridge! Light the beacon!']],
+ [['LU','The villagers are safe. Now let\'s go knock on the Iron King\'s door.']],
+ [['VAL','No army... can stand against what Ishkafar is building...'],['LU','We just did.'],['W','You have become a true warrior, Lucas.'],['LU','Heh. I told you. Greatest warrior of the New World. Well... second, after these two.']]),
+CH('Castle Sylthar','sylthar',['shade','voidtemplar','soulwisp'],'shadowking','ET',{t:'shrines',n:3,title:'Lights in the Shadow'},
+ [['N','Castle Sylthar was a kingdom of illusions. Paths that vanished. Doors that led back where you started.'],['ET','The Shadow King hides behind false paths. But illusions need light to exist. I can break them with the right spell.']],
+ [['ET','Help me light three Truth Lanterns around the castle. Their light will strip away the illusions.'],['ET','If you see two of me... the one complaining about the cold is the real one.']],
+ [['ET','The lanterns reveal the true path. Keep going.']],
+ [['ET','The illusions are breaking. There! The real Shadow King. Strike before he hides again.']],
+ [['SYL','You see through shadows... you will see through his...'],['ET','His throne room had prison records. Ava is alive. She\'s held somewhere beyond the Gate of the Forbidden.'],['KE','Alive... she\'s alive!']]),
+CH('Castle Aurora','auroraice',['frostfang','yeti','prismbat'],'iceking','KM',{t:'hunt',mob:'frostfang',n:15,title:'The Frozen Oath'},
+ [['N','Castle Aurora slept under green northern lights and endless snow.'],['KM','The Ice King\'s wolves have trapped a village in the pass. Real knights protect the helpless. That\'s the first lesson King Arthur taught me.'],['KM','I want to lead this one. If you\'ll let me.']],
+ [['KM','Fifteen Frost Fangs. I\'ll hold the village gate. You hunt them in the snow.'],['IS','You\'ve got this, Kamara.']],
+ [['KM','The villagers are counting on us. Keep going!']],
+ [['KM','The pass is clear! Everyone made it out. Now... the Ice King.']],
+ [['ICE','A child... with the heart of a knight...'],['KM','I didn\'t do it for glory. I did it because they needed someone.'],['W','Then you are already a knight, Kamara. The title is just a formality.']]),
+CH('Castle Draken','draken',['drakeling','dragonknight','magmaknight'],'dragonking','IS',{t:'gather',mob:'dragonknight',item:'Dragon Key Shard',n:10,title:'Key of the Last Kingdom'},
+ [['N','Castle Draken was the last kingdom between Eldoria and the Forbidden Territory.'],['IS','The Dragon King guards the only key to the deep lands. He has never been beaten.'],['IS','So we\'ll be the first.']],
+ [['IS','His knights carry pieces of the key. Ten shards. We take them, we assemble the key, and we face the king.']],
+ [['IS','Every shard matters. Let\'s keep moving.']],
+ [['IS','The key is whole. The Dragon King has smelled it already. Here he comes!']],
+ [['DRA','I guarded that key for a thousand years... take it. And end him.'],['IS','The road to the Forbidden Territory is open. But the kingdoms we freed are arguing. Some want to hide. Some want revenge.'],['W','Then they need someone to bring them together.']]),
+CH('The Broken Alliance','alliance',['bandit','ironlegion','voidtemplar'],'traitor','IS',{t:'hunt',mob:'voidtemplar',n:15,title:'Rally the Kingdoms'},
+ [['N','The freed kingdoms met in the ruins of the old capital. It did not go well.'],['IS','Enough! While you argue, Ishkafar grows stronger!'],['IS','Lucas, Ethan, Kamara, Kim. Show them what we\'ve done together.']],
+ [['IS','The Void Templars are attacking the council. Drive them out, and the kingdoms will see we can stand together.'],['LU','On your word, Isaac!'],['KI','Just this once, I\'ll follow orders.']],
+ [['IS','Protect the council! Don\'t let them break us apart!']],
+ [['IS','Commander Vorn. He sold the council\'s location to Ishkafar. He\'s the one who let the templars in.']],
+ [['IS','The alliance stands. Ten kingdoms, one banner.'],['W','Isaac, they followed your voice today. Not mine.'],['KE','Wensly. I found something in Vorn\'s orders. A trail. To Ava.']]),
+CH('The Empress\'s Trail','mire',['ghoul','leech','soulwisp'],'warden','KE',{t:'gather',mob:'ghoul',item:'Ava\'s Torn Ribbon',n:6,title:'Ribbons in the Mire'},
+ [['N','The trail led into a mire where the ground itself sank toward the east.'],['KE','Ava wore white ribbons in her hair. She would leave them behind on purpose, so I could find her. She always did.'],['W','I knew the prison existed. A floating keep inside the Forbidden Territory. I was not strong enough to reach it alone.']],
+ [['KE','The ghouls took her ribbons. Six of them. Please.']],
+ [['KE','Each ribbon is a message. "I\'m still here."']],
+ [['KE','I have them all. The Prison Warden patrols this mire. He knows the way to the keep.']],
+ [['KE','"Kendra, don\'t cry. Come get me." That\'s what she wrote on the last ribbon.'],['KE','I\'m not crying. I\'m coming, Ava.'],['W','The road to the prison goes through the Gate of the Forbidden. First, the Elders.']]),
+CH('The Last Kingdom\'s Oath','oathland',['elfguard','sentry','dragonknight'],'royalguardian','RG',{t:'shrines',n:3,title:'The Oath Stones'},
+ [['N','At the edge of Eldoria the Elders waited by three ancient oath stones.'],['RG','Beyond this point, ordinary strength is no longer enough.'],['AU','Ishkafar\'s gravity can be broken only by many hearts striking as one. Ethan has told you this. Now you must believe it.']],
+ [['RG','Renew the three Oath Stones. Each one binds a kingdom\'s promise to stand with you.']],
+ [['AU','The stones remember every promise ever made here.']],
+ [['RG','The oaths are renewed. The Last Royal Guardian must judge whether the alliance is worthy to enter.']],
+ [['AU','The guardian accepts you. The Forbidden Territory will open.'],['RG','But hear this. From here on, the enemies are built to crush lone heroes. Bring friends. Fight together. If you have no one, your companions will stand beside you.'],['IS','We\'ll be there. All of us.']]),
+CH('The Gate of the Forbidden','forbidgate',['voidtemplar','gravwisp','shade'],'gatekeeper','W',{t:'survive',time:60,title:'Hold the Gate'},
+ [['N','A wall of black stone split the world. Behind it, the sky bent like water.'],['W','The Gate of the Forbidden. Every knight who tried to pass it alone was crushed.'],['W','This is the last battle you can fight alone. Beyond the gate, we stand together or not at all.']],
+ [['W','The gate opens only when its beacon burns long enough. Light it and hold against Ishkafar\'s forces.']],
+ [['W','Hold! The gate is waking!']],
+ [['W','The gate is open, but its keeper remains.']],
+ [['W','We are through. Listen carefully, all of you.'],['W','From here, each enemy needs teamwork. Ethan, Isaac, Lucas, Kamara and Kim will fight beside anyone who has no party. Friends who join you online will always count for more.'],['ET','I\'ll explain each trick as we go. Promise.']]),
+CH('The Twin Executioners','forbid',['voidtemplar','bloodknight','shade'],'twinkael','IS',{t:'hunt',mob:'voidtemplar',n:12,title:'Linked Souls'},
+ [['N','The Forbidden Territory. The air itself was heavy.'],['ET','Two executioners guard the first pass. Their souls are linked. Kill one, and the other revives it within moments.'],['IS','So we split up. Two teams. Both fall together, or neither does.']],
+ [['IS','Clear the templars first so we have room to fight.']],
+ [['IS','Keep the templars busy.']],
+ [['ET','Remember: when one executioner falls, the other must fall within ten seconds. Bring a partner, or let one of us take the second one.']],
+ [['IS','Two teams, one victory. That\'s how the new generation fights.'],['KM','My arms are shaking. But we did it together.']]),
+CH('The Colossus of Chains','bridge',['ironlegion','voidtemplar','cogspider'],'chaincolossus','LU',{t:'hunt',mob:'ironlegion',n:12,title:'Break the Chains'},
+ [['N','A giant stood in the canyon, bound by enormous chains to three anchors.'],['LU','The chains make it unbreakable. While they hold, nothing can hurt it.'],['ET','Break all three anchors at nearly the same time, within twelve seconds. Otherwise they rebuild themselves.']],
+ [['LU','Clear the legion first. Then we split up, one anchor each.']],
+ [['LU','More soldiers! Push through!']],
+ [['ET','Three anchors, three fighters. Coordinate, then strike the colossus while it\'s free.']],
+ [['LU','Three anchors, three heroes, one giant down. I could get used to this.']]),
+CH('The Soul Queen','court',['soulwisp','shade','duskstalker'],'soulqueen','KE',{t:'hunt',mob:'soulwisp',n:12,title:'Freed Souls'},
+ [['N','In a palace of floating souls waited a queen who had forgotten her own name.'],['KE','The Soul Queen. She steals souls for Ishkafar. Ava could be next if we fail.'],['ET','She will try to harvest every soul in the arena at once. Interrupt her, and it takes three of us hitting her together.']],
+ [['KE','Free twelve trapped soul wisps. Every soul we free is one she can\'t use.']],
+ [['KE','There are more souls! Keep going!']],
+ [['ET','When she starts Soul Harvest, three of us must hit her during the cast. Otherwise the whole arena takes the blow.']],
+ [['KE','She\'s gone. And the souls are flying home.'],['KE','Ava... we\'re close now. I can feel it.']]),
+CH('The Three Calamities','storm',['zenithhawk','magmaknight','frostfang'],'calflame','KI',{t:'hunt',mob:'magmaknight',n:12,title:'Before the Storm'},
+ [['N','Three calamities ruled this valley: flame, frost and storm.'],['KI','Okay, so they protect each other. When they\'re close together, almost nothing hurts them.'],['ET','We have to pull them apart. Different fighters, different calamities. Keep them away from each other.']],
+ [['KI','Thin out the Magma Knights first. I\'ll scout the calamities\' lair.']],
+ [['KI','Keep going, I\'ll keep watching the valley.']],
+ [['ET','Three calamities, three groups. Drag them apart before you strike.']],
+ [['KI','Flame, frost and storm, all down. Do I get to be leader next time?'],['IS','Next time, Kim. Maybe.']]),
+CH('The Five Seals','eldrift',['gravwisp','voidtemplar','soulwisp'],'sealwarden','ET',{t:'hunt',mob:'gravwisp',n:15,title:'Practice Gravity'},
+ [['N','Five ancient seals ringed an arena of floating stone.'],['ET','This is a trial, a rehearsal for Ishkafar. Five seals. Five fighters must stand on them at the same time.'],['ET','While all five are held, the Seal Warden loses its protection. Learn this well. The final battle works the same way: five hearts, one moment.']],
+ [['ET','First, scatter the Gravity Wisps. Then we practice.']],
+ [['ET','Their gravity pulls are a warm-up for his.']],
+ [['ET','Five seals around the arena. Stand on all five together for a few seconds. Then strike the Warden while the seals are broken.']],
+ [['ET','Perfect. Five hearts, one moment. That is how we beat him.'],['IS','We\'re ready. All of us.']]),
+CH('Isaac, Leader of the New Generation','watchtower',['dragonknight','voidtemplar','ironlegion'],'trialchamp','IS',{t:'survive',time:60,title:'Isaac\'s Stand'},
+ [['N','Ishkafar\'s champion challenged the alliance to a test of leadership.'],['IS','He says the new generation will scatter without the old kings. Let\'s prove him wrong.'],['IS','Lucas, front. Kamara, protect the flank. Kim, scout. Ethan, support. We hold the beacon together.']],
+ [['IS','Light the beacon and hold. This time, I\'m standing at the front.']],
+ [['IS','Hold the line! Together!']],
+ [['IS','The Champion of Trials. Three of us strike together, or the champion shrugs it off.']],
+ [['W','Isaac. From this day on, you lead the new generation of Eldoria.'],['IS','I\'ll lead. But I only stand here because of them.'],['LU','Ha. Don\'t get sentimental on us now.']]),
+CH('The Gravity Front','gravity',['gravwisp','voidtemplar','shade'],'gravchamp','ET',{t:'hunt',mob:'gravwisp',n:15,title:'Bending Ground'},
+ [['N','Ruins floated in the air. The ground tilted under every step.'],['ET','We\'re inside Ishkafar\'s gravity field now. His champion will pull you toward it. Roll out when you feel the pull!'],['ET','Two of us striking together can break its shield.']],
+ [['ET','The wisps are the field\'s anchors. Break fifteen and the gravity weakens.']],
+ [['ET','Steady... the floor is moving again.']],
+ [['ET','The champion is here. When it pulls, dodge away from the center.']],
+ [['ET','The field is collapsing. I can see the prison keep floating ahead!'],['KE','Ava!']]),
+CH('The Empress\'s Prison','catacomb',['voidtemplar','shade','soulwisp'],'jailer','KE',{t:'shrines',n:3,title:'Unbind the Keep'},
+ [['N','The prison keep floated above an abyss. And inside a cage of light, the Empress.'],['AV','Kendra...? No. You shouldn\'t be here. He wants you to come!'],['KE','I don\'t care. I came to take you home.']],
+ [['KE','Three gravity locks bind the cage. Break them, and his jailer will come for us.'],['W','I will stay with you, Kendra. Whatever happens.']],
+ [['AV','Hurry... his gravity grows stronger every hour.']],
+ [['KE','The locks are broken! The jailer is coming.'],['ET','Three of us must strike together. Go!']],
+ [['N','The cage cracked... but it did not open. A voice filled the sky.'],['IK','Clever children. You reached my prison. But the Empress\'s chains are tied to my heart.'],['IK','Come to my sanctum. Bring all your friends. It won\'t be enough.'],['W','Gather everyone. Five of us, at least. This is the battle we prepared for.']]),
+CH('Ishkafar, the Dark Wizard','gravity',['voidtemplar','gravwisp','soulwisp'],'ishkafar','W',{t:'hunt',mob:'voidtemplar',n:10,title:'The Last Approach'},
+ [['N','Ishkafar\'s sanctum floated at the heart of the Forbidden Territory.'],['IK','Children of Essa and Liza. I took your mothers, and I will take you.'],['P','You will not take anyone else. Not ever again.'],['ET','Remember everything. He can\'t be hurt by lonely strikes. Five of us must hit him at the same moment.']],
+ [['W','Clear the path to the sanctum. Then we go in together.']],
+ [['W','Push through!']],
+ [['W','This is it. Five fighters, one heart. Friends, and companions to fill any empty place.'],['IS','For Ava. For Essa and Liza. For Eldoria.']],
+ [['IK','Impossible... no single blade could reach me...'],['P','We were never single blades.'],['N','Ishkafar\'s gravity collapsed. Far away, the cage of light shattered.']]),
+CH('A New Dawn','dawn',['bunny','blob','sprite'],null,'KE',{t:'shrines',n:3,title:'Lanterns for the Lost'},
+ [['N','For the first time in years, the sun rose over all of Eldoria.'],['AV','Kendra!'],['KE','Ava! Ava, you\'re free... I promised, didn\'t I?'],['AV','You did. My brave little sister.']],
+ [['KE','The people want to light three memorial lanterns. One for those we lost.'],['KE','And one each for Essa and Liza. Without them, none of us would be here.']],
+ [['KE','The last lanterns are near the hills.']],
+ [['AV','Heroes of Lumen. Eldoria will never forget you.'],['W','The kingdoms will rebuild. And they will have strong protectors.'],['AV','Isaac, the people chose you to lead the new generation. Will you accept?'],['IS','I will. With all of them beside me.']],
+ []),
+);
+CHS[49].finale=[['P','{H}... do you think they can see us? Our moms?'],['N','The lanterns rose into the morning sky, burning gold.'],['H','I think they always could.'],['AV','Rest now, heroes. But know this: the rift showed us more than Eldoria. There are other worlds out there.'],['N','The New World Arc ends. But the oath lives on, in every world.']];
+// level scale for the new world: reaches the top levels near chapter 100
+const _chL0=chLevel;chLevel=c=>c<20?_chL0(c):Math.round(58+(c-19)*5.4);
+// how many fighters each forbidden boss expects (companions fill the gap)
+CHS.forEach((c,i)=>{if(c.boss&&BOSSES[c.boss]&&BOSSES[c.boss].mech)c.party=BOSSES[c.boss].mech.need;});
 /* ================= RENDERER & QUALITY ================= */
 const T=THREE;if(T.ColorManagement)T.ColorManagement.legacyMode=false;
 const cv=$('#c');
@@ -1175,7 +1473,7 @@ function buildWorld(c){
  // beacon
  G.beaconObj=null;if(G.beacon){const bc=G.beacon;const g=grp(bc.x,gY(bc.x,bc.z),bc.z);g.add(mesh(CYL(.9,1.1,.4,8),mat(0x5a4a3a),0,.2,0));g.add(mesh(CYL(.12,.14,3.2,6),mat(0x4a3a2a),0,1.8,0));const fl=glowSprite(0xff9a3a,3);fl.position.y=3.6;g.add(fl);const ring=mesh(RING(5.6,6),basic(0xff9a3a,{transparent:true,opacity:.35,side:T.DoubleSide,depthWrite:false}),0,.06,0);ring.rotation.x=-Math.PI/2;ring.castShadow=false;g.add(ring);world.add(g);G.beaconObj={g,fl,ring};}
  // hostage cage (throne chapter)
- G.cage=null;if(c===18||(c===19&&!S.cleared[19])){const cz=AR.z-10;const cg=grp(0,gY(0,cz)+(c===18?4:0),cz);const pm=buildHero(partnerKey(),partnerKey()==='L'?'knight':'priest',{w:{tier:2,rar:2,ref:0,slot:'w'},a:{tier:1,rar:1,ref:0,slot:'a'},s:{tier:1,rar:1,ref:0,slot:'s'}});cg.add(pm.root);
+ G.cage=null;if(c===18||(c===19&&!S.cleared[19])||c===47||(c===48&&!S.cleared[48])){const cz=AR.z-10;const cg=grp(0,gY(0,cz)+(c===18||c===47?4:0),cz);const pm=c>=47?buildHero('C','priest',{a:{tier:4,rar:3,ref:0,slot:'a'}},{cust:{style:'long',hair:0xe8c070,outfit:0xf4f0ff}}):buildHero(partnerKey(),partnerKey()==='L'?'knight':'priest',{w:{tier:2,rar:2,ref:0,slot:'w'},a:{tier:1,rar:1,ref:0,slot:'a'},s:{tier:1,rar:1,ref:0,slot:'s'}});cg.add(pm.root);
   const bm=mat(0x8a7aa0,{metalness:.8,roughness:.3,emissive:0x5a2a9a,emissiveIntensity:.5});for(let i=0;i<12;i++){const a=i/12*Math.PI*2;cg.add(mesh(CYL(.05,.05,3,5),bm,Math.cos(a)*1.3,1.5,Math.sin(a)*1.3));}cg.add(mesh(CYL(1.45,1.45,.15,12),bm,0,3,0));cg.add(mesh(CYL(1.45,1.45,.15,12),bm,0,.07,0));cg.add(glowSprite(0xff7ac0,4).translateY(1.2));world.add(cg);G.cage=cg;G.cageModel=pm;}
  // particles
  const n2=Q().parts*.8|0,pp=new Float32Array(n2*3);for(let i=0;i<n2;i++){pp[i*3]=rnd(-35,35);pp[i*3+1]=rnd(0,14);pp[i*3+2]=rnd(-35,35);}
@@ -1223,7 +1521,7 @@ function importCode(code){try{const s=JSON.parse(decodeURIComponent(escape(atob(
 function newItem(slot,tier,rar,ref,af){return {id:S.nid++,slot,tier,rar,ref:ref||0,af:af||null};}
 function freshSave(hk,ck,cust,df){
  S={v:4,hero:hk,cls:ck,cust:cust||null,diff:df==null?1:df,skp:0,sk:{a0:1},bar:[0,null,null,null,null,null],job:0,lv:1,exp:0,st:Object.assign({},CLASSES[ck].base),pts:0,zeny:150,pots:{red:3,orange:0,white:0,blue:1},loot:{},ore:{ori:2,elu:2},items:[],eq:{w:null,a:null,h:null,s:null,r:null},nid:1,ch:0,unlocked:0,cleared:[],q:[],flask:3,blood:null,auto:0,autoEq:1,ngp:0,done:0,music:1,sfx:1,play:0};
- for(let i=0;i<20;i++){S.cleared.push(0);S.q.push({s:0,p:0,shr:[0,0,0]});}
+ for(let i=0;i<CHS.length;i++){S.cleared.push(0);S.q.push({s:0,p:0,shr:[0,0,0]});}
  const w=newItem('w',0,0),a=newItem('a',0,0);S.items.push(w,a);S.eq.w=w.id;S.eq.a=a.id;
  if(CLASSES[ck].shield){const s=newItem('s',0,0);S.items.push(s);S.eq.s=s.id;}
 }
@@ -1231,7 +1529,7 @@ const need=lv=>Math.floor(12*Math.pow(lv,1.8)+20);
 const itemById=id=>S.items.find(i=>i.id===id);
 const C_=()=>CLASSES[S.cls];
 const partnerKey=()=>S.hero==='L'?'C':'L';
-const fmt=s=>s.replace(/\{H\}/g,heroName()).replace(/\{P\}/g,partnerName());
+const fmt=s=>s.replace(/\{H\}/g,heroName()).replace(/\{P\}/g,partnerName()).replace(/\{M\}/g,momOf(S.hero)).replace(/\{PM\}/g,momOf(partnerKey()));
 function iAtk(it){return Math.round(WATK[it.tier]*RMUL[it.rar]*(1+.1*it.ref)+it.ref*3);}
 function iDef(it){if(it.slot==='r')return 0;const b={a:ADEF,h:HDEF,s:SDEF}[it.slot][it.tier];return Math.round(b*RMUL[it.rar]*(1+.1*it.ref)+it.ref);}
 function iHp(it){return it.slot==='a'?Math.round(AHP[it.tier]*RMUL[it.rar]*(1+.08*it.ref)):0;}
@@ -1266,9 +1564,10 @@ function stats(){
   smult:(1+st.int*.011+C.main(st)*.003)*(1+psVal('smult'))
  };
 }
-function mobDef(key,lv){const p=MOBS[key];const hp=Math.round((60+lv*lv*.9+lv*16)*p.hpM),atk=Math.round((10+lv*3+lv*lv*.07)*p.atkM);
- return Object.assign({},p,{key,lv,hp,atk,def:Math.round(lv*.9),exp:Math.round(6+lv*lv*.6+lv*3),z:[Math.round(lv*1.2+2),Math.round(lv*3+5)],loot:[p.loot[0],p.loot[1],lv*2+5,.45]});}
-function bossDef(key,lv){const p=BOSSES[key];const m=mobDef('blob',lv);return Object.assign({},p,{key,lv,hp:Math.round(m.hp*9.5/.8),atk:Math.round(m.atk*1.6/.8),def:Math.round(lv*1.2),exp:Math.round(m.exp*45),z:[lv*60,lv*90],aggro:1,ad:1.6,loot:[p.n+' Remnant','🏆',lv*40,1],boss:1});}
+// above Lv 60 monsters grow more gently (players grow mostly through gear, refines and skills there)
+function mobDef(key,lv){const p=MOBS[key];const k=lv/60;const hp=Math.round((lv<=60?60+lv*lv*.9+lv*16:4260*Math.pow(k,.9))*p.hpM),atk=Math.round((lv<=60?10+lv*3+lv*lv*.07:442*Math.pow(k,1.1))*p.atkM);
+ return Object.assign({},p,{key,lv,hp,atk,def:Math.round(lv<=60?lv*.9:54+(lv-60)*.3),exp:Math.round(6+lv*lv*.6+lv*3),z:[Math.round(lv*1.2+2),Math.round(lv*3+5)],loot:[p.loot[0],p.loot[1],lv*2+5,.45]});}
+function bossDef(key,lv){const p=BOSSES[key];const m=mobDef('blob',lv);return Object.assign({},p,{key,lv,hp:Math.round(m.hp*9.5/.8),atk:Math.round(m.atk*1.6/.8),def:Math.round(lv<=60?lv*1.2:72+(lv-60)*.4),exp:Math.round(m.exp*45),z:[lv*60,lv*90],aggro:1,ad:1.6,loot:[p.n+' Remnant','🏆',lv*40,1],boss:1});}
 
 /* ================= GAME STATE ================= */
 const G={mode:'title',t:0,ts:1,mobs:[],projs:[],drops:[],fx:[],texts:[],boss:null,st:null,shake:0,hitstop:0,flash:0,spawnT:0,lightHeld:false,saveT:0,hudT:0,tab:'status',bagF:'all',pois:[],shr:[],shrObj:[],gate:'sealed',bossFight:false,intro:null,surv:null,zoom:1,slow:0,int:null,chan:null,cams:0};
@@ -1280,7 +1579,7 @@ function log(m){const l=$('#log'),d=document.createElement('div');d.innerHTML=m;
 let banTO=null;function banner(a,b,ms=2600){$('#bn1').textContent=a;$('#bn2').textContent=b||'';const bn=$('#banner');bn.style.opacity=1;clearTimeout(banTO);banTO=setTimeout(()=>bn.style.opacity=0,ms);}
 let bigTO=null;function bigText(t,col,ms=2600){const b=$('#bigT');b.textContent=t;b.style.color=col;b.style.textShadow='0 0 20px '+col;$('#big').style.opacity=1;clearTimeout(bigTO);bigTO=setTimeout(()=>$('#big').style.opacity=0,ms);}
 function txt(x,y,z,s,c,big){const el=document.createElement('div');el.className='ft'+(big?' big':'');el.textContent=s;el.style.color=c;$('#fl').appendChild(el);G.texts.push({x:x+rnd(-.3,.3),y,z,el,t:0});}
-function titleCard(c){banner('Chapter '+(c+1)+': '+CHS[c].name,ACTS[Math.floor(c/4)]+' · Recommended Lv '+chLevel(c)+'+',3400);}
+function titleCard(c){banner('Chapter '+(c+1)+': '+CHS[c].name,ACTS[actOf(c)]+' · Recommended Lv '+chLevel(c)+'+',3400);}
 function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('show',s.id===id));}
 function showGameUI(v){['#hud','#ctrl','#joyHint'].forEach(s=>$(s).classList.toggle('hide',!v));document.body.classList.toggle('ingame',v);if(!v)$('#bInt').style.display='none';}
 
@@ -1294,6 +1593,7 @@ function nextDlg(){
  else if(code==='P'||code==='PE'){name=partnerName()+(code==='PE'?' (echo)':'');por=HEROES[partnerKey()].icon;}
  else if(code==='PL'){name=partnerName()+"'s note";por='📜';}
  else if(code==='Q'){const n=CHS[S.ch].npc;name=fmt(n.n);por=n.ic;}
+ else if(code==='EM'){name='Echo of '+momOf(S.hero);por='🕯️';}
  else{const s=SPK[code]||['',''];name=s[0];por=s[1];narr=code==='N';}
  $('#dPor').style.display=narr?'none':'';$('#dPor').textContent=por;$('#dName').textContent=name;const dt=$('#dText');dt.textContent=fmt(text);dt.className=narr?'narr':'';
 }
@@ -1324,7 +1624,7 @@ function loadChapter(c,keepHp,dg){G.inArena=false;G.dg=dg||null;G.intro=null;$('
  buildWorld(G.dg&&G.dg.wc!=null?G.dg.wc:c);hero.x=0;hero.z=4;hero.face=Math.PI;hero.dead=false;hero.state='idle';
  G.st=stats();if(!keepHp){hero.hp=G.st.mhp;hero.sp=G.st.msp;hero.flask=S.flask;}hero.sta=G.st.msta;
  rebuildHero();const onl=FB.uid&&FB.online&&FB.avail;if(!onl&&!G.dg)for(let i=0;i<mobMax();i++)spawnMob(false);G.spawnT=3;G.introDone=0;
- G.gate=S.q[c].s>=3||S.cleared[c]?'open':'sealed';updateGate();snapCam();musicFor(c,false);if(G.dg)dgSetup();jmSpawn();
+ G.gate=S.q[c].s>=3||S.cleared[c]?'open':'sealed';updateGate();snapCam();musicFor(c,false);if(G.dg)dgSetup();jmSpawn();alliesClear();G.pull=null;sealBuild();
  if(onl)netJoin(c);else netLeave();
 }
 function updateGate(){const f=G.fog;if(!f)return;const open=G.gate==='open';f.m.material.color.setHex(open?0x9fd0ff:0x707a88);f.m.material.opacity=open?.45:.3;f.gl.material.color.setHex(open?0x8ad8ff:0x444444);f.gl.material.opacity=open?.45:.15;}
@@ -1414,7 +1714,7 @@ function dealDamage(m,mult,o){if(m.dead)return 0;const st=G.st;let crit=false,ri
  if(m.ripT>0&&(o.kind==='light'||o.kind==='heavy')){rip=true;m.ripT=0;dmg=st.atk*mult*3.4*(100/(100+m.d.def*.3));}
  else{crit=!!o.crit||Math.random()<st.crit;dmg=st.atk*mult*(o.kind==='skill'?st.smult:1)*rnd(.92,1.08)*(crit?1.6:1)*(100/(100+m.d.def*(crit?.4:1)));}
  let elT='';if(o.el&&m.el){if(o.el===m.el[0]){dmg*=1.5;elT='WEAK!';}else if(o.el===m.el[1]){dmg*=.6;elT='RESIST';}}
- dmg=Math.max(1,Math.round(dmg));m.hp-=dmg;m.flash=.12;m.agg=true;if(elT)txt(m.x,hy+.9,m.z,(EL[o.el]?EL[o.el][0]:'')+' '+elT,elT==='WEAK!'?EL[o.el][2]:'#888',elT==='WEAK!');
+ dmg=Math.max(1,Math.round(dmg));if(m.d.mech||m.nImm){if(isPuppet()){if(m.nImm){gText(m,'🛡️ SHIELDED');return 0;}}else{dmg=gateDmg(m,dmg,FB.uid||'me');if(dmg<=0)return 0;}}m.hp-=dmg;m.flash=.12;m.agg=true;if(elT)txt(m.x,hy+.9,m.z,(EL[o.el]?EL[o.el][0]:'')+' '+elT,elT==='WEAK!'?EL[o.el][2]:'#888',elT==='WEAK!');
  const lsv=magic?st.sls:st.ls;if(lsv>0){const h=dmg*lsv;hero.hp=Math.min(st.mhp,hero.hp+h);if(h>=1&&Math.random()<.5)txt(hero.x,hero.y+2.2,hero.z,'+'+Math.round(h),magic?'#b98cff':'#ff6a8a',false);}
  if(rip){txt(m.x,hy+.6,m.z,'CRITICAL!','#ffd76a',true);txt(m.x,hy,m.z,dmg,'#ffd76a',true);G.hitstop=.14;G.shake=.4;G.zoom=.85;fxSpark(m.x,hy-.6,m.z,0xffd76a,3.5);sfx('crit');PS.burst(m.x,hy-.6,m.z,22,0xffd76a,{sp:5,up:4});}
  else{txt(m.x,hy,m.z,(crit?'✦':'')+dmg,crit?'#ffe14d':o.kind==='skill'?'#'+new T.Color(o.col||0xff9a3c).getHexString():o.kind==='heavy'?'#ffb070':'#ffffff',crit||o.kind!=='light');if(crit)sfx('crit');}
@@ -1429,7 +1729,7 @@ function applyPoise(m,po,rip,kind,local){const hy=gY(m.x,m.z)+m.mdl.h*(m.d.s||1)
 function heroHit(dmg,src,unblock,pv){if(hero.dead||G.intro)return 'x';const st=G.st;
  if(hero.iframe){return 'dodge';}
  if(hero.parryOn&&!unblock){parrySuccess(src);return 'parry';}
- let d=Math.max(1,Math.round(dmg*(pv?1:diff().dmg)*rnd(.92,1.08)*(100/(100+st.def*(pv?1.6:1)))*(1-st.red)*(hero.state==='drink'?1.3:1)));if(pv)d=Math.min(d,Math.max(1,Math.round(st.mhp*pv)));G.lastPv=d;hero.hp-=d;hero.lastHit=G.t;txt(hero.x,hero.y+2.4,hero.z,'-'+d,'#ff5a5a',d>st.mhp*.2);G.shake=Math.max(G.shake,d>st.mhp*.2?.4:.18);sfx(d>st.mhp*.25?'hurtbig':'hurt');
+ let d=Math.max(1,Math.round(dmg*(pv?1:diff().dmg)*rnd(.92,1.08)*(100/(100+st.def*(pv?1.6:1)))*(1-st.red)*(hero.state==='drink'?1.3:1)));if(pv)d=Math.min(d,Math.max(1,Math.round(st.mhp*pv)));else d=Math.min(d,Math.round(st.mhp*.85));G.lastPv=d;hero.hp-=d;hero.lastHit=G.t;txt(hero.x,hero.y+2.4,hero.z,'-'+d,'#ff5a5a',d>st.mhp*.2);G.shake=Math.max(G.shake,d>st.mhp*.2?.4:.18);sfx(d>st.mhp*.25?'hurtbig':'hurt');
  PS.burst(hero.x,hero.y+1.2,hero.z,8,0xff3a3a,{sp:2.5,up:2.5,s:.7});
  $('#vig').style.boxShadow='inset 0 0 120px rgba(255,0,0,.6)';setTimeout(()=>$('#vig').style.boxShadow='inset 0 0 120px rgba(255,0,0,0)',160);
  if(hero.state!=='heavy'&&hero.state!=='cast'&&hero.state!=='roll'){hero.state='stun';hero.actT=0;hero.actDur=unblock?.45:.3;hero.queued=null;}
@@ -1459,7 +1759,7 @@ function killMob(m,ev){if(m.killed)return;m.killed=1;m.dead=true;m.deadT=.9;m.md
  const hy=gY(m.x,m.z)+.6;PS.burst(m.x,hy,m.z,m.boss?60:14,d.col,{sp:m.boss?6:3,up:4,life:.9});
  if(hero.lock===m)hero.lock=null;if(hero.engage===m)hero.engage=null;
  if(NET.on&&NET.host)netEmit({y:'k',id:m.id,k:(m.boss?'b:':'m:')+d.key+':'+d.lv,x:Math.round(m.x*10)/10,z:Math.round(m.z*10)/10,by:Object.keys(m.dmgBy||{}),add:m.add?1:0,wv:m.wave?1:0});
- if(m.boss){G.boss=null;if(!isPuppet())G.mobs.filter(x=>x.add&&!x.dead).forEach(x=>{x.hp=0;killMob(x);});}
+ if(m.boss){G.boss=G.mobs.find(o=>o.boss&&!o.dead)||null;if(!isPuppet()&&!G.boss)G.mobs.filter(x=>x.add&&!x.dead).forEach(x=>{x.hp=0;killMob(x);});}
  const credit=!NET.on||(m.boss?G.bossFight:((m.dmgBy&&m.dmgBy[FB.uid])||(!hero.dead&&dxz(hero,m)<35)));
  if(credit)rewardKill(m);}
 function rewardKill(m){const c=S.ch,d=m.d;const hy=gY(m.x,m.z)+.6;
@@ -1472,7 +1772,8 @@ function rewardKill(m){const c=S.ch,d=m.d;const hy=gY(m.x,m.z)+.6;
   if(d.loot&&Math.random()<d.loot[3]){const k=d.loot[0];if(!S.loot[k])S.loot[k]={e:d.loot[1],p:d.loot[2],c:0};S.loot[k].c++;}}
  const pr=Math.random();if(pr<.08&&!m.add)gotPot(c<4?'red':c<10?(Math.random()<.5?'red':'orange'):(Math.random()<.6?'orange':'white'));if(Math.random()<.03&&!m.add)gotPot('blue');
  if(Math.random()<.05&&!m.add){S.ore.ori++;log('🔷 Oridecon');}if(Math.random()<.05&&!m.add){S.ore.elu++;log('🔶 Elunium');}
- if(m.boss){for(let i=0;i<2;i++){const e=rollEquip(chTier(c),true);spawnDrop(e,m.x+rnd(-2,2),m.z+rnd(-2,2));}S.ore.ori+=3;S.ore.elu+=3;S.pots.white=Math.min(POT_MAX,S.pots.white+2);log('🔷🔶 +3 Oridecon/Elunium');
+ if(m.boss&&G.mobs.some(o=>o!==m&&o.boss&&!o.dead)){txt(m.x,hy+2,m.z,m.d.n+' falls!','#e8c26a',true);}
+ else if(m.boss){for(let i=0;i<2;i++){const e=rollEquip(chTier(c),true);spawnDrop(e,m.x+rnd(-2,2),m.z+rnd(-2,2));}S.ore.ori+=3;S.ore.elu+=3;S.pots.white=Math.min(POT_MAX,S.pots.white+2);log('🔷🔶 +3 Oridecon/Elunium');
   if(G.dg){if(G.dg.trial)trialCleared();else dungeonCleared(m);}else{G.slow=1.6;G.zoom=.8;bigText(d.final?'GREAT ENEMY FELLED':'ENEMY FELLED','#e8c26a',3400);bossDefeated(c);}}
  else{if(!m.add&&Math.random()<.3)spawnDrop(rollEquip(chTier(c),false),m.x,m.z);}
  gainExp(ex);}
@@ -1493,7 +1794,8 @@ function questReady(){sfx('quest');banner('Quest objective complete','Return to 
 function questText(){const c=S.ch,q=CHS[c].quest,qs=S.q[c];if(S.cleared[c])return ['Chapter cleared','Free roam · boss can be fought again at the mist'];if(qs.s===0)return ['❗ Talk to '+fmt(CHS[c].npc.n),'at the Site of Grace'];if(qs.s===3)return ['Mist is open','Traverse the mist to face the boss'];if(qs.s===2)return [q.title,'✓ Return to '+fmt(CHS[c].npc.n)];
  const m=q.mob?MOBS[q.mob].n:'';if(q.t==='hunt')return [q.title,`Slay ${m}: ${qs.p}/${q.n}`];if(q.t==='gather')return [q.title,`${q.item} from ${m}: ${qs.p}/${q.n}`];if(q.t==='shrines')return [q.title,`Kindled: ${qs.shr.filter(Boolean).length}/${q.n}`];if(q.t==='survive')return [q.title,G.surv?`Survive: ${Math.ceil(G.surv.left)}s`:'Light the beacon and hold your ground'];return ['',''];}
 function talkNPC(){const c=S.ch,qs=S.q[c],ch=CHS[c];sfx('ui');
- if(S.cleared[c]){story([['Q',c===19?'We did it, {H}. Let\'s go home.':'The way forward is open, hero. Go.']]);return;}
+ if(!ch.boss&&qs.s===2&&!S.cleared[c]){story(ch.qd,()=>newDawnFinale());return;}
+ if(S.cleared[c]){story([['Q',c===CHS.length-1?'Eldoria is at peace, thanks to you.':c===19?'We did it, {H}. Let\'s go home.':'The way forward is open, hero. Go.']]);return;}
  if(qs.s===0){story(ch.qs,()=>{qs.s=1;qs.p=0;sfx('quest');banner('New Quest: '+ch.quest.title,questText()[1],2600);save();});}
  else if(qs.s===1)story(ch.qp);
  else if(qs.s===2)story(ch.qd,()=>{qs.s=3;G.gate='open';updateGate();sfx('gate');banner('The mist has parted','Traverse it when you are ready',3000);fxRing(0,-28,6,0x8ad8ff,1.2);if(ch.quest.t!=='survive'){}save();});
@@ -1528,14 +1830,14 @@ function updateQuests(dt){const c=S.ch,qs=S.q[c],q=CHS[c].quest;
 /* ================= BOSS FIGHT ================= */
 function enterMist(){const c=S.ch;if(NET.on){hero.x=0;hero.z=AR.z+AR.r-2.5;hero.face=0;hero.state='idle';hero.lock=null;hero.engage=null;hero.dest=null;G.lightHeld=false;G.bossFight=true;G.inArena=true;G.introDone=0;musicFor(c,true);
   const b=G.mobs.find(m=>m.boss&&!m.dead);if(b)onNetBoss(b);else if(NET.host)hostSpawnBoss();else{netEmit({y:'boss'});toast('The mist stirs...',1500);}return;}
- const d=bossBoost(bossDef(CHS[c].boss,chLevel(c)+6+S.ngp*20));hero.x=0;hero.z=AR.z+AR.r-2.5;hero.face=0;hero.state='idle';hero.lock=null;hero.engage=null;hero.dest=null;G.lightHeld=false;
- const m=mkMob(d,AR.x,AR.z-8,true);m.agg=false;m.face=Math.PI;G.mobs.push(m);G.boss=m;G.bossFight=true;G.inArena=true;
+ hero.x=0;hero.z=AR.z+AR.r-2.5;hero.face=0;hero.state='idle';hero.lock=null;hero.engage=null;hero.dest=null;G.lightHeld=false;G.bossFight=true;G.inArena=true;
+ const m=spawnChapterBoss(c),d=m.d;
  G.mobs.filter(x=>!x.boss&&!x.dead&&Math.hypot(x.x-AR.x,x.z-AR.z)<AR.r+4).forEach(x=>{x.x+=(x.x>=0?1:-1)*20;});
  G.intro={t:0,dur:3.6,m};$('#cine').style.opacity=1;sfx('roar_'+(d.roar||'deep'));musicFor(c,true);
  setTimeout(()=>{$('#bossN').textContent=d.n;bigText(d.n.toUpperCase(),'#e8c26a',3000);},900);
  if(c===19&&G.cage){}}
 function endBossFight(won){G.bossFight=false;G.intro=null;$('#cine').style.opacity=0;if(NET.on)return;if(!won){G.mobs.filter(m=>m.boss||m.add).forEach(m=>{m.dead=true;m.deadT=0;});G.boss=null;}}
-function bossDefeated(c){const first=!S.cleared[c];S.bk=(S.bk||0)+1;S.cleared[c]=1;S.unlocked=Math.max(S.unlocked,Math.min(19,c+1));endBossFight(true);musicFor(c,false);save();
+function bossDefeated(c){const first=!S.cleared[c];S.bk=(S.bk||0)+1;S.cleared[c]=1;S.unlocked=Math.max(S.unlocked,Math.min(CHS.length-1,c+1));endBossFight(true);musicFor(c,false);save();
  if(!first){log('Boss defeated again!');return;}
  if(c%4===3&&S.flask<8){S.flask++;setTimeout(()=>{toast('💧 Sacred Tear: Flask charges +1 (now '+S.flask+')',2800);sfx('levelup');},2000);}
  setTimeout(()=>{G.drops.forEach(d=>{world.remove(d.g);collect(d);});G.drops=[];
@@ -1634,7 +1936,7 @@ function update(dt){
  }
  // spawns
  const alive=G.mobs.filter(m=>!m.dead&&!m.boss&&!m.add&&!m.wave).length;G.spawnT-=dt;if(!isPuppet()&&alive<mobMax()&&G.spawnT<=0&&!G.bossFight){spawnMob(true);if(mobMax()-alive>4)spawnMob(false);G.spawnT=2.5;}
- if(isPuppet())puppetMobs(dt);else updateMobs(dt,st);updateProjs(dt);if(G.dg)dgTick(dt);updateDrops(dt);updateFx(dt);PS.update(dt);
+ if(isPuppet())puppetMobs(dt);else updateMobs(dt,st);updateProjs(dt);if(G.dg)dgTick(dt);if(isPuppet()){ralliesTick(dt);pullTick(dt);sealVis();}else coopTick(dt);updateDrops(dt);updateFx(dt);PS.update(dt);
  G.mobs=G.mobs.filter(m=>{if(m.dead&&m.deadT<=0){removeMob(m);return false;}return true;});
  if(G.parts){const b=B[ch.b];const p=G.parts.geometry.attributes.position,a=p.array,v=b.pv;for(let i=0;i<a.length;i+=3){a[i]+=v[0]*dt+Math.sin(G.t+i)*.01;a[i+1]+=v[1]*dt;a[i+2]+=v[2]*dt;
   if(a[i]-hero.x>35)a[i]-=70;if(a[i]-hero.x<-35)a[i]+=70;if(a[i+2]-hero.z>35)a[i+2]-=70;if(a[i+2]-hero.z<-35)a[i+2]+=70;if(a[i+1]<0)a[i+1]+=14;if(a[i+1]>14)a[i+1]-=14;}p.needsUpdate=true;}
@@ -1759,6 +2061,7 @@ function animRig(M,h,C,dt,local){const s=h.state,t=G.t,p=clamp(h.actT/h.actDur,0
  hero.trail.update(dt);}
 function animMob(m,dt){const M=m.mdl,t=G.t+m.ph,mv=m.moving?1:0,s=m.d.s||1;let y=gY(m.x,m.z);
  if(M.anim)M.anim(t,m,dt);
+ if(m.d.mech||m.nImm)mechVis(m);
  if(m.jump){const j=m.jump;j.t+=dt;const p=Math.min(1,j.t/j.dur);m.x=lerp(j.sx,j.tx,p);m.z=lerp(j.sz,j.tz,p);y=gY(m.x,m.z)+Math.sin(p*Math.PI)*6;if(p>=1){m.jump=null;}}
  M.root.position.set(m.x,y,m.z);M.root.rotation.y=m.face;
  if(M.heroRig){M.pivot.rotation.set(0,0,0);const sw=Math.sin(t*12)*mv;M.legL.rotation.x=sw*.8;M.legR.rotation.x=-sw*.8;M.kneeL.rotation.x=Math.max(0,sw);M.kneeR.rotation.x=Math.max(0,-sw);M.armL.rotation.x=-sw*.6;M.armR.rotation.x=m.state==='windup'?-2.4*(1-m.wT/m.wu):m.lunge>0?-.3:sw*.6;M.foreR.rotation.x=-.3;M.foreL.rotation.x=-.3;if(M.aura){M.aura.rotation.z+=dt*2;}M.body.rotation.x=m.stag>0?-.3:0;return;}
@@ -1827,7 +2130,7 @@ function updateOverlay(){
   if(!L.boss){const p=toScreen(L.x,ly+hh+1.35,L.z);tn.style.display='block';tn.style.left=p.x+'px';tn.style.top=p.y+'px';tn.innerHTML=`${L.d.n} <span style="color:#ffd76a">Lv${L.d.lv}</span>${L.d.shield?' 🛡️':''}`;tn.style.color=L.d.aggro?'#ffb0b0':'#fff';}else tn.style.display='none';}
  else{if(G.lockMk){G.lockMk.visible=G.lockDia.visible=false;}tn.style.display='none';}
  if(G.graceObj){G.graceObj.gs.material.opacity=.7+.3*Math.sin(G.t*2);}
- if(NET.on||hero.bub)peersOverlay();jmOverlay();G.ptT=(G.ptT||0)+1;if(G.ptT%10===0)partyHud();
+ if(NET.on||hero.bub)peersOverlay();jmOverlay();alliesOverlay();G.ptT=(G.ptT||0)+1;if(G.ptT%10===0)partyHud();
  if(G.npcLbl)G.npcLbl.style.display=G.npc?'':'none';
  if(G.npc){if(!G.npcLbl){G.npcLbl=document.createElement('div');G.npcLbl.className='lbl';$('#fl').appendChild(G.npcLbl);}const p=toScreen(G.npc.x,gY(G.npc.x,G.npc.z)+3.4,G.npc.z);G.npcLbl.style.left=p.x+'px';G.npcLbl.style.top=p.y+'px';G.npcLbl.textContent=fmt(G.npc.d.n);G.npcLbl.style.color='#ffe6a0';G.npcLbl.style.display=p.vis&&dxz(hero,G.npc)<22&&G.mode==='game'?'':'none';}}
 /* ================= MINIMAP ================= */
@@ -1963,6 +2266,7 @@ function menuAct(a,v,b){let reb=false;sfx('ui');
   case 'join':joinPlayer(v);return;
   case 'unfr':ask('Remove '+esc(FB.friends[v]||'this friend')+' from friends?',['Remove','Cancel']).then(r=>{if(r===0)removeFriend(v);});return;
   case 'party':setPartyMode(!FB.partyMode);break;
+  case 'mapw':G.mapW=+v;G.mapSel=null;break;
   case 'mapsel':G.mapSel=/^\d+$/.test(v)?+v:v;break;
   case 'dgenter':closeMenu();enterDungeon(v,FB.uid||'solo');save();return;
   case 'dgleave':closeMenu();exitDungeon();return;
@@ -2008,7 +2312,7 @@ function lbHtml(){if(!G.lbT||Date.now()-G.lbT>30000)lbFetch();const f=G.lbF||'p'
  const d=G.lbData;if(!d)return h+'<div class="card">'+(G.lbErr?'Could not load the leaderboard ('+G.lbErr+').':'Loading…')+'</div>';
  const DI=['🌱','⚖️','💀'];
  if(f==='p'){h+='<div class="card">';d.slice(0,100).forEach((r,i)=>{const fa=FACTIONS.find(x=>x.k===r.fa),C=CLASSES[r.c];const me=r.uid===FB.uid;
-   h+=`<div class="row" style="${me?'background:rgba(232,194,106,.12)':''}"><span class="nm"><b style="color:${i<3?['#ffd76a','#dfeaff','#e0a070'][i]:'#a99cc0'};display:inline-block;width:30px">#${i+1}</b><span style="color:${fa?fa.c:'#fff'}">${fa?fa.e+' ':''}${r.n}</span> ${DI[r.d!=null?r.d:2]}<i>${C?C.ic+' '+C.n:''} · Lv ${r.l} · ${r.cl||0}/20 ch · ${r.bk||0} bosses${r.ng?' · NG+'+r.ng:''}${r.pv?' · ⚔️'+r.pv:''}</i></span><b style="color:#ffd76a">${(r.sc||0).toLocaleString()}</b></div>`;});
+   h+=`<div class="row" style="${me?'background:rgba(232,194,106,.12)':''}"><span class="nm"><b style="color:${i<3?['#ffd76a','#dfeaff','#e0a070'][i]:'#a99cc0'};display:inline-block;width:30px">#${i+1}</b><span style="color:${fa?fa.c:'#fff'}">${fa?fa.e+' ':''}${r.n}</span> ${DI[r.d!=null?r.d:2]}<i>${C?C.ic+' '+C.n:''} · Lv ${r.l} · ${r.cl||0}/${CHS.length} ch · ${r.bk||0} bosses${r.ng?' · NG+'+r.ng:''}${r.pv?' · ⚔️'+r.pv:''}</i></span><b style="color:#ffd76a">${(r.sc||0).toLocaleString()}</b></div>`;});
   if(!d.length)h+='<i>No scores yet. Be the first!</i>';h+='</div>';}
  else{const t={};for(const r of d){if(!r.fa)continue;const o=t[r.fa]=t[r.fa]||{sc:0,cnt:0,top:null};o.sc+=r.sc||0;o.cnt++;if(!o.top)o.top=r;}
   const fs=FACTIONS.map(x=>({f:x,o:t[x.k]||{sc:0,cnt:0,top:null}})).sort((a,b)=>b.o.sc-a.o.sc);h+='<div class="card">';
@@ -2087,7 +2391,7 @@ function sfx(n){if(!sfxOn())return;const t=AC.currentTime;if(sfxLast[n]&&t-sfxLa
 const SCALES={maj:[0,2,4,5,7,9,11],min:[0,2,3,5,7,8,10],phr:[0,1,3,5,7,8,10],dor:[0,2,3,5,7,9,10]};
 const THEMES=[{root:50,sc:'maj',prog:[0,4,5,3],bpm:76},{root:52,sc:'phr',prog:[0,1,0,6],bpm:84},{root:57,sc:'min',prog:[0,5,3,4],bpm:70},{root:48,sc:'min',prog:[0,6,5,4],bpm:74},{root:42,sc:'phr',prog:[0,1,5,4],bpm:80},{root:45,sc:'min',prog:[0,5,3,4],bpm:64}];
 const mtf=m=>440*Math.pow(2,(m-69)/12);
-function musicFor(ch,boss){if(!AC)return;const act=ch<0?5:Math.floor(ch/4);musicState.act=act;musicState.boss=boss;musicState.on=!S||!!S.music;musicState.phase2=false;if(!musicState.on){mG.gain.setTargetAtTime(0,AC.currentTime,.3);}else mG.gain.setTargetAtTime(boss?.42:.3,AC.currentTime,.8);}
+function musicFor(ch,boss){if(!AC)return;const act=ch<0?5:Math.floor(ch/4)%5;musicState.act=act;musicState.boss=boss;musicState.on=!S||!!S.music;musicState.phase2=false;if(!musicState.on){mG.gain.setTargetAtTime(0,AC.currentTime,.3);}else mG.gain.setTargetAtTime(boss?.42:.3,AC.currentTime,.8);}
 function musicPhase2(){musicState.phase2=true;}
 function musicDuck(sec){if(!AC)return;duck=sec;mG.gain.setTargetAtTime(.08,AC.currentTime,.1);setTimeout(()=>{if(AC&&musicState.on)mG.gain.setTargetAtTime(musicState.boss?.42:.3,AC.currentTime,1);},sec*1000);}
 function musicTick(){if(!AC||!musicState.on||musicState.act<0)return;const th=THEMES[musicState.act];const bpm=musicState.boss?(musicState.phase2?148:136):th.bpm;const spb=60/bpm/4;
@@ -2178,7 +2482,7 @@ function fbDelete(slot){if(!FB.uid)return;FB.saves[slot]=null;FB.lastCore[slot]=
 function calcScore(s){s=s||S;const cl=(s.cleared||[]).reduce((a,b)=>a+(b?1:0),0);const dg=Object.values(s.dgc||{}).reduce((a,b)=>a+b,0);return Math.round((s.lv*100+cl*500+(s.bk||0)*250+(s.ngp||0)*6000+(s.pvw||0)*150+dg*400)*[.5,1,1.5][s.diff!=null?s.diff:2]);}
 // basic sanity check so edited saves don't climb the leaderboard
 function plausible(s){const cl=(s.cleared||[]).filter(Boolean).length,dg=Object.values(s.dgc||{}).reduce((a,b)=>a+b,0),ng=s.ngp||0;
- return s.lv<=Math.min(LV_MAX,45+chLevel(s.unlocked||0)*2+ng*130+dg*2)&&cl<=20&&(s.bk||0)<=(cl+1+ng*20)*80+dg*3&&(s.pvw||0)<=20000&&Object.values(s.st||{}).every(v=>v<=STAT_MAX+20)&&(s.items||[]).every(i=>i.ref<=REF_MAX&&i.tier<=6);}
+ return s.lv<=Math.min(LV_MAX,45+chLevel(s.unlocked||0)*2+ng*130+dg*2)&&cl<=CHS.length&&(s.bk||0)<=(cl+1+ng*20)*80+dg*3&&(s.pvw||0)<=20000&&Object.values(s.st||{}).every(v=>v<=STAT_MAX+20)&&(s.items||[]).every(i=>i.ref<=REF_MAX&&i.tier<=6);}
 function lbUpdate(){if(!FB.uid||!S)return;if(!plausible(S)){if(!FB.flagged){FB.flagged=1;console.warn('score not posted: save looks edited');}return;}const sc=calcScore();if(sc<=FB.myBest)return;FB.myBest=sc;
  FB.db.ref('lb/'+FB.uid).set({n:FB.name,fa:S.fac||'',c:S.cls,j:S.job||0,l:S.lv,sc,d:S.diff!=null?S.diff:2,bk:S.bk||0,cl:(S.cleared||[]).filter(Boolean).length,ng:S.ngp||0,pv:S.pvw||0,dg:Object.values(S.dgc||{}).reduce((a,b)=>a+b,0),t:firebase.database.ServerValue.TIMESTAMP}).catch(()=>{});}
 
@@ -2199,6 +2503,7 @@ function netJoin(c){netLeave();if(!FB.uid||!FB.online||!FB.avail||!S)return;
  const pl=base.child('pl');sub(pl,'child_added',s=>peerAdd(s.key,s.val()));sub(pl,'child_changed',s=>peerUpd(s.key,s.val()));sub(pl,'child_removed',s=>peerDel(s.key));
  sub(base.child('host'),'value',s=>hostChanged(s.val()));
  sub(base.child('mobs'),'value',s=>{NET.gotSnap=true;NET.snap=s.val()||{};if(!NET.host)applyMobs(NET.snap);});
+ sub(base.child('meta/al'),'value',s=>alliesFromNet(s.val()));
  sub(base.child('meta'),'value',s=>{const v=s.val();NET.meta=v;NET.diff=v&&v.diff!=null?v.diff:null;});
  sub(base.child('ev').orderByChild('t').startAt(sNow()-1500),'child_added',s=>{const e=s.val();if(!e||e.u===FB.uid)return;if(e.to&&e.to!==FB.uid)return;try{applyEv(e);}catch(err){console.warn(err);}});
  sub(base.child('hits'),'child_added',s=>{if(!NET.host)return;const h=s.val();s.ref.remove().catch(()=>{});try{hostApplyHit(h);}catch(err){}});
@@ -2206,7 +2511,7 @@ function netJoin(c){netLeave();if(!FB.uid||!FB.online||!FB.avail||!S)return;
 function netLeave(){if(!NET.on&&!NET.subs.length)return;for(const [r,e,f] of NET.subs)r.off(e,f);NET.subs=[];
  if(NET.me){NET.me.remove().catch(()=>{});NET.me.onDisconnect().cancel();}
  if(NET.host&&NET.base){const hr=NET.base.child('host');hr.onDisconnect().cancel();hr.transaction(c=>c&&c.uid===FB.uid?null:undefined).catch(()=>{});}
- for(const uid in NET.peers)peerDel(uid);NET.on=false;NET.host=false;NET.me=null;NET.base=null;NET.duel=null;NET.diff=null;}
+ for(const uid in NET.peers)peerDel(uid);for(const n in G.rallies)allyRemove(G.rallies[n]);G.rallies={};NET.on=false;NET.host=false;NET.me=null;NET.base=null;NET.duel=null;NET.diff=null;}
 function netEmit(ev){if(!NET.on||!NET.base)return;ev.u=FB.uid;ev.t=firebase.database.ServerValue.TIMESTAMP;NET.base.child('ev').push(ev).catch(()=>{});}
 function netHit(h){if(!NET.on||!NET.base)return;h.u=FB.uid;NET.base.child('hits').push(h).catch(()=>{});}
 
@@ -2298,6 +2603,8 @@ function applyEv(e){switch(e.y){
  case 'pv':if(isFoe(e.u)&&!(NET.duel.team&&NET.duel.myOut)){const lvF=clamp(1+((e.lv||S.lv)-S.lv)*.005,.75,1.45);const r=heroHit(e.d*PVP_MULT*lvF,null,!!e.ub,e.sk?PVP_CAP_SK:PVP_CAP);if(r==='parry')netEmit({y:'pp',to:e.u});else netEmit({y:'pd',to:e.u,d:r==='hit'?G.lastPv:0,cr:e.cr||0,dg:r==='dodge'?1:0});}break;
  case 'pd':{const p=NET.peers[e.u];if(p&&p.x!=null)txt(p.x,gY(p.x,p.z)+2.3,p.z,e.dg?'DODGE':(e.cr?'✦':'')+e.d,e.dg?'#9ab':e.cr?'#ffe14d':'#ffb0b0',!!e.cr);break;}
  case 'dg':dgOnEvent(e);break;
+ case 'pull':pullLocal(e);break;
+ case 'bn':banner(e.a,e.b,e.d||2200);break;
  case 'cm':chatArea(e);break;
  case 'pp':if(isFoe(e.u)){hero.state='stun';hero.actT=0;hero.actDur=1.1;txt(hero.x,hero.y+2.6,hero.z,'PARRIED!','#8fd3ff',true);sfx('parry');}break;
  case 'dw':if(NET.duel&&!NET.duel.team&&NET.duel.uid===e.u)duelEnd(true);break;
@@ -2318,14 +2625,14 @@ function hEmit(e,local){if(local)local(e);if(NET.on&&NET.host)netEmit(e);}
 /* ---------- mob replication ---------- */
 const SCODE={windup:1,recover:2,cast:3};
 function serMobs(){const o={};for(const m of G.mobs){if(m.dead)continue;if(!m.id)m.id=netMid();const k=(m.boss?'b:':'m:')+m.d.key+':'+m.d.lv;let f=0;
- if(m.boss)f|=1;if(m.add)f|=2;if(m.wave)f|=4;if(m.agg)f|=8;if(m.stag>0)f|=16;if(m.ripT>0)f|=32;if(m.gb>0)f|=64;if(m.moving)f|=128;if(m.stun>0)f|=256;if(m.lunge>0)f|=512;if(m.flash>0)f|=1024;
+ if(m.boss)f|=1;if(m.add)f|=2;if(m.wave)f|=4;if(m.agg)f|=8;if(m.stag>0)f|=16;if(m.ripT>0)f|=32;if(m.gb>0)f|=64;if(m.moving)f|=128;if(m.stun>0)f|=256;if(m.lunge>0)f|=512;if(m.flash>0)f|=1024;if((m.immT||0)>G.t)f|=2048;
  const jy=m.jump?Math.round(Math.sin(Math.min(1,m.jump.t/m.jump.dur)*Math.PI)*60):0;
  o[m.id]=[k,Math.round(m.x*10),Math.round(m.z*10),Math.round(m.face*100),Math.max(0,Math.round(m.hp)),Math.round(m.mhp),SCODE[m.state]||0,Math.round((m.wu||0)*100),Math.round(Math.max(0,m.wT||0)*100),f,m.phase||1,Math.round(m.poise||0),jy,m.combo||0];}return o;}
 function applyMobs(o){const seen={};for(const id in o){const a=o[id];if(!a)continue;seen[id]=1;let m=G.mobs.find(x=>x.id===id);
   if(!m){const [ty,key,lv]=a[0].split(':');if(!(ty==='b'?BOSSES[key]:MOBS[key]))continue;const d=ty==='b'?bossDef(key,+lv):mobDef(key,+lv);d._dm=1;m=mkMob(d,a[1]/10,a[2]/10,ty==='b');m.id=id;m.face=a[3]/100;G.mobs.push(m);if(m.boss)onNetBoss(m);}
   if(m.dead)continue;m.missing=0;m.nx=a[1]/10;m.nz=a[2]/10;m.nf=a[3]/100;if(!m.hpPredT||G.t>m.hpPredT)m.hp=a[4];m.mhp=a[5];
   const st=['chase','windup','recover','cast'][a[6]]||'chase';if(st==='windup'&&m.state!=='windup'){m.wu=Math.max(.05,a[7]/100);m.wT=a[8]/100;m.flashed=0;}m.state=st;
-  const f=a[9];m.add=!!(f&2);m.wave=!!(f&4);m.agg=!!(f&8);m.stag=f&16?.3:0;m.ripT=f&32?.4:0;m.gb=f&64?.3:0;m.moving=!!(f&128);m.stun=f&256?.3:0;m.lunge=f&512?.1:0;if(f&1024)m.flash=Math.max(m.flash,.05);
+  const f=a[9];m.add=!!(f&2);m.wave=!!(f&4);m.agg=!!(f&8);m.stag=f&16?.3:0;m.ripT=f&32?.4:0;m.gb=f&64?.3:0;m.moving=!!(f&128);m.stun=f&256?.3:0;m.lunge=f&512?.1:0;if(f&1024)m.flash=Math.max(m.flash,.05);m.nImm=!!(f&2048);
   if(m.boss&&a[10]===2&&m.phase!==2){m.phase=2;if(G.bossFight){banner(m.d.n+' grows furious!','Phase 2',2400);musicPhase2();}}m.phase=a[10];m.poise=a[11];m.jy=(a[12]||0)/10;m.combo=a[13]||0;}
  for(const m of G.mobs){if(!m.dead&&m.id&&!seen[m.id]){m.missing=(m.missing||0)+1;if(m.missing>=3){m.dead=true;m.deadT=.01;if(hero.lock===m)hero.lock=null;if(hero.engage===m)hero.engage=null;}}if(!m.id&&!m.dead){m.dead=true;m.deadT=.01;}}
  G.boss=G.mobs.find(m=>m.boss&&!m.dead)||null;}
@@ -2340,17 +2647,18 @@ function onNetBoss(m){G.boss=m;if(G.bossFight&&!G.introDone){G.introDone=1;G.int
 function hostApplyHit(h){if(!h)return;const m=mobById(h.id);if(!m||m.dead)return;(m.dmgBy=m.dmgBy||{})[h.u]=1;m.agg=true;
  if(h.pr){m.stag=m.boss?1.6:2.2;m.ripT=m.stag;cancelWind(m);if(m.boss)m.poise+=40;return;}
  if(h.gb){m.gb=2.5;m.stag=1.2;cancelWind(m);}
- const d=+h.d||0;if(d<=0)return;m.hp-=Math.min(d,m.mhp);m.flash=.12;
+ const d=+h.d||0;if(d<=0)return;const dd=m.d.mech?gateDmg(m,Math.min(d,m.mhp),h.u):Math.min(d,m.mhp);if(dd<=0)return;m.hp-=dd;m.flash=.12;
  if(h.rip)m.ripT=0;applyPoise(m,h.p||0,!!h.rip,h.k,false);
  if(m.hp<=0)killMob(m);}
 
 /* ---------- players / targets for host AI ---------- */
 const livePeer=p=>p.info&&p.x!=null&&Date.now()-(p.lastT||0)<25000;
-function players(){const a=[];if(!hero.dead)a.push({x:hero.x,z:hero.z,dead:false,me:1,ar:!!G.bossFight});if(NET.on)for(const p of Object.values(NET.peers)){if(p.dead||!livePeer(p))continue;a.push({x:p.x,z:p.z,dead:false,ar:!!p.ar,uid:p.uid});}return a;}
+function players(){const a=[];if(!hero.dead)a.push({x:hero.x,z:hero.z,dead:false,me:1,ar:!!G.bossFight});for(const al of G.allies)a.push({x:al.x,z:al.z,dead:false,ar:true,ally:1,uid:'ally_'+al.n});if(NET.on)for(const p of Object.values(NET.peers)){if(p.dead||!livePeer(p))continue;a.push({x:p.x,z:p.z,dead:false,ar:!!p.ar,uid:p.uid});}return a;}
 function tgtFor(m){let ps=players();if(m.boss&&NET.on)ps=ps.filter(p=>p.ar);
+ if(m.boss&&m.d.mech&&m.d.mech.t==='trio'&&ps.length>1){const tr=G.mobs.filter(o=>o.boss&&!o.dead&&o.d.mech&&o.d.mech.t==='trio');const i=tr.indexOf(m);if(i>=0)return ps[i%ps.length];}
  if(m.boss&&ps.length>1){const key=p=>p.uid||'me';let c=ps.find(p=>key(p)===m.tgU);if(!c||G.t>(m.tgT||0)){c=ps[ri(0,ps.length-1)];m.tgU=key(c);m.tgT=G.t+rnd(5,9);}return c;}
  let b=null,bd=1e9;for(const p of ps){const d=Math.hypot(p.x-m.x,p.z-m.z);if(d<bd){bd=d;b=p;}}return b||{x:hero.x,z:hero.z,dead:true};}
-function hostSpawnBoss(){const c=S.ch;const d=bossBoost(bossDef(CHS[c].boss,chLevel(c)+6+(S.ngp||0)*20));const m=mkMob(d,AR.x,AR.z-8,true);m.id=netMid();m.agg=false;m.face=Math.PI;m.baseMhp=m.mhp;m.coopN=1;G.mobs.push(m);G.boss=m;
+function hostSpawnBoss(){const c=S.ch;if(!CHS[c].boss)return null;const m=spawnChapterBoss(c),d=m.d;
  G.mobs.filter(x=>!x.boss&&!x.dead&&Math.hypot(x.x-AR.x,x.z-AR.z)<AR.r+4).forEach(x=>{x.x+=(x.x>=0?1:-1)*20;});
  if(G.bossFight&&!G.introDone){G.introDone=1;G.intro={t:0,dur:3.6,m};$('#cine').style.opacity=1;sfx('roar_'+(d.roar||'deep'));setTimeout(()=>{$('#bossN').textContent=d.n;bigText(d.n.toUpperCase(),'#e8c26a',3000);},900);}return m;}
 
@@ -2363,7 +2671,7 @@ function netTick(dt){if(!NET.on)return;
  if(NET.host){NET.mT+=dt;if(NET.mT>=.2){NET.mT=0;const o=serMobs(),up={};let n=0;for(const id in o){const k=o[id].join(',');if(NET.sent[id]!==k){NET.sent[id]=k;up[id]=o[id];n++;}}for(const id in NET.sent)if(!o[id]){delete NET.sent[id];up[id]=null;n++;}if(n)NET.base.child('mobs').update(up).catch(()=>{});}
   NET.hbT+=dt;if(NET.hbT>=3){NET.hbT=0;NET.base.child('host').set({uid:FB.uid,n:FB.name,ts:sNow()}).catch(()=>{});}
   NET.cleanT+=dt;if(NET.cleanT>=6){NET.cleanT=0;NET.base.child('ev').orderByChild('t').endAt(sNow()-9000).limitToFirst(200).once('value',s=>s.forEach(c=>{c.ref.remove().catch(()=>{});})).catch(()=>{});}
-  NET.bossT+=dt;if(NET.bossT>=1){NET.bossT=0;const b=G.mobs.find(m=>m.boss&&!m.dead);if(b){const n=players().filter(p=>p.ar).length;b.coopN=Math.max(1,n);b.agg=n>0;
+  NET.bossT+=dt;if(NET.bossT>=1){NET.bossT=0;const b=G.mobs.find(m=>m.boss&&!m.dead);if(b){const n=players().filter(p=>p.ar&&!p.ally).length;b.coopN=Math.max(1,n);b.agg=n>0;
    if(!b.baseMhp)b.baseMhp=b.mhp;const tgt=Math.round(b.baseMhp*(1+.7*(Math.max(1,n)-1)));if(tgt>b.mhp){b.hp+=tgt-b.mhp;b.mhp=tgt;if(n>1)log('👥 Boss grows stronger: '+n+' players');}
    if(n===0){b.empty=(b.empty||0)+1;if(b.empty>=6){b.dead=true;b.deadT=.01;G.boss=null;}}else b.empty=0;}}}
  else{NET.chkT+=dt;if(NET.chkT>=3){NET.chkT=0;if(!NET.hostUid||sNow()-(NET.hostTs||0)>9500)tryClaimHost();}}
@@ -2619,7 +2927,25 @@ function friendsWire(){const i=$('#frIn'),b=$('#frGo');if(!i)return;const go=asy
 /* ---------- world map ---------- */
 const WM_POS=[[90,470],[185,425],[150,340],[265,300],[385,420],[480,485],[590,435],[695,475],[805,405],[905,330],[850,230],[925,130],[790,90],[665,150],[560,95],[460,165],[360,110],[260,170],[160,110],[70,55]];
 const WM_DG={crypt:[500,380],forge:[720,345],sanctum:[610,240],abyss:[55,190]};
-function mapHtml(){const sel=G.mapSel==null?(G.dg&&!G.dg.arena&&!G.dg.trial?'d:'+G.dg.k:S.ch):G.mapSel;const pres=FB.pres||{};const here={};
+function mapTabs(w){return `<div class="fbar" style="margin-bottom:6px"><button data-a="mapw" data-v="0" class="${w===0?'on':''}">🏰 The Old World (1-20)</button><button data-a="mapw" data-v="1" class="${w===1?'on':''}">${S.unlocked>=20?'🌍':'🔒'} Eldoria (21-${CHS.length})</button></div>`;}
+const WM2_POS=[];for(let i=0;i<30;i++){const row=Math.floor(i/6),col=i%6;WM2_POS.push([row%2?885-col*155:115+col*155,490-row*104]);}
+function mapEldHtml(){const sel=typeof G.mapSel==='number'&&G.mapSel>=20?G.mapSel:Math.max(20,S.ch);const here={};
+ for(const [u,v] of Object.entries(FB.pres||{})){if(u===FB.uid||v.ch<20)continue;(here[v.ch]=here[v.ch]||[]).push({u,v});}
+ let svg=`<svg viewBox="0 0 1000 560" style="width:100%;height:auto;display:block;background:radial-gradient(ellipse at 50% 45%,#2a1a4a 0%,#140c26 60%,#06040e 100%);border-radius:10px">`;
+ svg+=`<defs><filter id="wmb2"><feGaussianBlur stdDeviation="20"/></filter></defs><g filter="url(#wmb2)" opacity=".7">`;
+ WM2_POS.forEach(([x,y],k)=>{const b=B[CHS[20+k].b];svg+=`<circle cx="${x}" cy="${y}" r="70" fill="#${new T.Color(b.g1).getHexString()}"/>`;});svg+='</g>';
+ [['Act VI · The Journey Begins',150,548],['Act VII · Ancient Secrets',840,440],['Act VIII · The Ten Kingdoms',500,330],['Act IX · The Forbidden Territory',500,125],['Act X · A New Dawn',860,22]].forEach(([t,x,y])=>{svg+=`<text x="${x}" y="${y}" fill="rgba(232,194,106,.55)" font-size="16" font-family="Georgia" text-anchor="middle" font-style="italic">${t}</text>`;});
+ svg+=`<path d="M${WM2_POS.map(p=>p.join(' ')).join(' L')}" fill="none" stroke="rgba(176,106,255,.5)" stroke-width="3" stroke-dasharray="8 7"/>`;
+ WM2_POS.forEach(([x,y],k)=>{const i=20+k,cl=S.cleared[i],lk=i>S.unlocked,me=S.ch===i&&!G.dg,b=B[CHS[i].b],col='#'+new T.Color(b.g1).getHexString(),co=CHS[i].party;
+  svg+=`<g data-a="mapsel" data-v="${i}" style="cursor:pointer">${sel===i?`<circle cx="${x}" cy="${y}" r="26" fill="none" stroke="#fff" stroke-width="2.5"/>`:''}<circle cx="${x}" cy="${y}" r="19" fill="${lk?'#2a2a33':col}" stroke="${cl?'#ffd76a':lk?'#555':co?'#ff6a6a':'#cbbde3'}" stroke-width="3"/>
+  <text x="${x}" y="${y+6}" fill="${lk?'#777':'#fff'}" font-size="15" font-weight="800" text-anchor="middle" font-family="system-ui">${lk?'🔒':i+1}</text>${cl?`<text x="${x+15}" y="${y-12}" font-size="13">👑</text>`:''}${co&&!lk?`<text x="${x-27}" y="${y+5}" font-size="12">🤝</text>`:''}
+  ${me?`<text x="${x}" y="${y-27}" fill="#ffd76a" font-size="13" font-weight="800" text-anchor="middle">▼ YOU</text>`:''}${here[i]?`<circle cx="${x+17}" cy="${y-15}" r="10" fill="#2fbf6a" stroke="#fff" stroke-width="1.5"/><text x="${x+17}" y="${y-10.5}" fill="#fff" font-size="12" font-weight="800" text-anchor="middle">${here[i].length}</text>`:''}</g>`;});
+ svg+='</svg>';const c=CHS[sel],lk=sel>S.unlocked,ppl=here[sel]||[];
+ const info=`<div class="card"><div class="ttl">Chapter ${sel+1}: ${c.name} ${S.cleared[sel]?'👑':''}</div><span style="color:#a99cc0;font-size:12px">${ACTS[actOf(sel)]} · Recommended Lv ${chLevel(sel)}+${c.boss?' · Boss: <b>'+BOSSES[c.boss].n+'</b>':' · Story chapter'}${c.party?` · 🤝 <b style="color:#ff9a9a">Team battle (${c.party} fighters). Companions fill empty spots.</b>`:''}</span>${ppl.length?'<br>👥 Here now: '+ppl.slice(0,8).map(({u,v})=>(FB.friends[u]?'⭐':'')+esc(v.n)).join(', '):''}<br>
+  ${lk?`<i>🔒 ${sel===20?'Defeat Malgrath (Chapter 20) to open the New World.':'Clear Chapter '+sel+' to unlock.'}</i>`:S.ch===sel&&!G.dg?'<i>📍 You are here.</i>':`<button class="mbtn" data-a="travel" data-v="${sel}">🚶 Travel here</button>`}</div>`;
+ return `<div class="card" style="padding:6px">${mapTabs(1)}${svg}<div style="font-size:11px;color:#a99cc0;margin-top:4px">👑 cleared · 🤝 team battle · 🟢 players there · ▼ you</div></div>`+info+(G.dg?`<button class="mbtn" data-a="dgleave">🚪 Leave</button>`:'');}
+function mapHtml(){if((G.mapW!=null?G.mapW:(S.ch>=20&&!G.dg?1:0))===1)return mapEldHtml();return mapOldHtml();}
+function mapOldHtml(){const sel=G.mapSel==null||(typeof G.mapSel==='number'&&G.mapSel>=20)?(G.dg&&!G.dg.arena&&!G.dg.trial?'d:'+G.dg.k:Math.min(19,S.ch)):G.mapSel;const pres=FB.pres||{};const here={};
  for(const [u,v] of Object.entries(pres)){if(u===FB.uid||v.ch<0)continue;const key=String(v.w||'').startsWith('dg_')?'d:'+String(v.w).split('_')[1]:v.ch;(here[key]=here[key]||[]).push({u,v});}
  let svg=`<svg viewBox="0 0 1000 560" style="width:100%;height:auto;display:block;background:radial-gradient(ellipse at 50% 55%,#2a3a4a 0%,#162030 60%,#0a0f18 100%);border-radius:10px;touch-action:manipulation">`;
  svg+=`<defs><filter id="wmb"><feGaussianBlur stdDeviation="22"/></filter></defs><g filter="url(#wmb)" opacity=".75">`;
@@ -2641,7 +2967,7 @@ function mapHtml(){const sel=G.mapSel==null?(G.dg&&!G.dg.arena&&!G.dg.trial?'d:'
  else{const D=dgDef(String(sel).slice(2));const ok=dgUnlocked(D);const cnt=(S.dgc||{})[D.k]||0;info=`<div class="card"><div class="ttl" style="color:${D.col}">${D.e} ${D.n} · Dungeon</div><span style="font-size:12.5px">${D.d}</span><br><span style="color:#a99cc0;font-size:12px">Recommended Lv ${dgLevel(D)}+ · 3 waves of elites, then <b>${BOSSES[D.boss].n}</b> · Party of up to 4 recommended · Cleared ${cnt}×</span><br>
   <span style="font-size:12px">Rewards: Gold / <b class="r3">S-Tier</b> gear${D.tier>=6?' · <b style="color:#b04aff">always Abyssal (best gear in the game)</b>':' · <b style="color:#b04aff">chance of Abyssal gear</b>'} · 🛡️ Protection Scroll · ores · lots of zeny</span>${pl}<br>
   ${G.dg&&G.dg.k===D.k?'<button class="mbtn" data-a="dgleave">🚪 Leave dungeon</button>':ok?`<button class="mbtn" data-a="dgenter" data-v="${D.k}">⚔️ Enter dungeon${FB.partyMode?' (friends-only)':''}</button><i style="font-size:11px;color:#a99cc0">Friends can join you from 🌐 Online → Join.</i>`:`<i>🔒 Clear Chapter ${D.req+1} to unlock.</i>`}</div>`;}
- return `<div class="card" style="padding:6px">${svg}<div style="font-size:11px;color:#a99cc0;margin-top:4px">Tap a land or a ◆ dungeon. 👑 cleared · 🟢 players there · ▼ you</div></div>`+info+(G.dg?`<button class="mbtn" data-a="dgleave">🚪 Leave ${G.dg.arena?'the Duel Arena':'dungeon'}</button>`:'');}
+ return `<div class="card" style="padding:6px">${mapTabs(0)}${svg}<div style="font-size:11px;color:#a99cc0;margin-top:4px">Tap a land or a ◆ dungeon. 👑 cleared · 🟢 players there · ▼ you</div></div>`+info+(G.dg?`<button class="mbtn" data-a="dgleave">🚪 Leave ${G.dg.arena?'the Duel Arena':'dungeon'}</button>`:'');}
 
 /* ---------- password change ---------- */
 function pwDialog(){return new Promise(res=>{const m=$('#modal');$('#mdIn').style.display='none';
@@ -2659,7 +2985,9 @@ function pwDialog(){return new Promise(res=>{const m=$('#modal');$('#mdIn').styl
 function socialStart(){friendsStart();chatStart();chatBadge();}
 function socialStop(){friendsStop();chatStop();chatBadge();}
 /* ================= JOB CHANGE QUESTS · TRIAL · JOB LOOKS · AWAKENING · PARTY HP ================= */
-const JQ=[null,{hunt:40,emb:10,sh:0},{hunt:80,emb:20,sh:0},{hunt:150,emb:30,sh:3}];
+const JQ_KILLS=1000;const JQ=[null,{hunt:JQ_KILLS},{hunt:JQ_KILLS},{hunt:JQ_KILLS}];
+// monsters count if they are near your level, OR from the strongest land you have unlocked (so over-levelled players can still finish)
+function jqMinLv(){return Math.max(1,Math.min(S.lv-25,chLevel(S.unlocked||0)-2));}
 function jqEligible(){return S.job<3&&S.lv>=JOB_LV[S.job+1];}
 Object.assign(BOSSES,{jobtrial:{n:'Your Shadow',m:'trialhero',col:0x1a1026,s:1.3,spd:3.8,r:1.1,sp:['combo','jump','charge','bolts','sweep','combo'],roar:'whisper'}});
 MB.trialhero=d=>{const o=buildHero(S.hero,S.cls,eqVisFromSave(),{dark:1,cust:S.cust,job:Math.min(3,(S.job||0)+1)});o.human=1;o.legs=[o.legL,o.legR];o.arms=[o.armL,o.armR];o.heroRig=1;return o;};
@@ -2671,23 +2999,22 @@ function jmSpawn(){if(G.jm){world.remove(G.jm.m.root);G.jm=null;}if(G.dg||!S||!(
  if(!G.jmLbl){G.jmLbl=document.createElement('div');G.jmLbl.className='lbl';$('#fl').appendChild(G.jmLbl);}}
 function jmOverlay(){const L=G.jmLbl;if(!L)return;if(!G.jm||G.mode!=='game'){L.style.display='none';return;}const p=toScreen(G.jm.x,gY(G.jm.x,G.jm.z)+3.4,G.jm.z);L.style.display=p.vis?'':'none';L.style.left=p.x+'px';L.style.top=p.y+'px';
  const q=S.jq;L.innerHTML=`<span style="color:#ffd76a">${q&&q.s===3?'⚔️ ':q?'':'❗ '}Job Master Orin</span>`;}
-function jqText(){const q=S.jq;if(!q)return null;const R=JQ[q.to],nx=JOBS[S.cls][q.to];
- if(q.s===1)return [`🎓 Job Quest: ${nx}`,`Defeat monsters near your level: ${q.p}/${R.hunt}`];
+function jqText(){const q=S.jq;if(!q)return null;if(q.s===2)q.s=1;const R=JQ[q.to],nx=JOBS[S.cls][q.to];
+ if(q.s===1)return [`🎓 Job Quest: ${nx}`,`Defeat any monsters: ${q.p}/${R.hunt}`];
  if(q.s===2)return [`🎓 Job Quest: ${nx}`,`Job Emblems: ${q.p}/${R.emb}${R.sh?` · Awakening Shards (dungeon bosses): ${q.sh||0}/${R.sh}`:''}`];
  return [`🎓 Job Quest: ${nx}`,'Return to Job Master Orin for the Trial'];}
 function talkJM(){const q=S.jq,J=JOBS[S.cls];sfx('ui');
  if(S.job>=3&&!q){story([['JM',`You have walked every path, ${J[3]}. There is nothing left I can teach you.`]]);return;}
  if(!q){if(!jqEligible()){story([['JM',`Come back at level ${JOB_LV[S.job+1]}. Then I will show you the path of the ${J[S.job+1]}.`]]);return;}
   const to=S.job+1,R=JQ[to];story([['JM',`So, ${heroName()}. You have outgrown the ${J[S.job]}.`],['JM',`The path of the <b>${J[to]}</b> is open to you, but it must be earned.`],
-   ['JM',`First, defeat ${R.hunt} monsters near your own strength. Then bring me ${R.emb} Job Emblems${R.sh?' and '+R.sh+' Awakening Shards from dungeon bosses':''}. Last, you will face the Trial.`],['H','I accept.']],
-   ()=>{S.jq={to,s:1,p:0,sh:0};banner('Job Quest: '+J[to],`Defeat ${R.hunt} monsters near your level`,2800);sfx('quest');save();});return;}
- if(q.s===1){story([['JM',`Keep fighting. ${q.p}/${JQ[q.to].hunt} defeated. Only monsters near your level count.`]]);return;}
- if(q.s===2){story([['JM',`Emblems: ${q.p}/${JQ[q.to].emb}${JQ[q.to].sh?`. Awakening Shards: ${q.sh||0}/${JQ[q.to].sh} (only dungeon bosses carry them)`:''}. Monsters drop the emblems.`]]);return;}
+   ['JM',`First, defeat ${R.hunt} monsters, any monsters, anywhere. Then you will face the Trial.`],['H','I accept.']],
+   ()=>{S.jq={to,s:1,p:0,sh:0};banner('Job Quest: '+J[to],`Defeat ${R.hunt} monsters (any), then the Trial`,2800);sfx('quest');save();});return;}
+ if(q.s===1){story([['JM',`Keep fighting. ${q.p}/${JQ[q.to].hunt} monsters defeated. Any monster counts, anywhere.`]]);return;}
+
  story([['JM','You are ready. In the Trial Arena you will face the one enemy who knows every move you make.'],['JM','Yourself. Defeat your Shadow, and become the '+J[q.to]+'.']],()=>enterTrial());}
-function jqKill(d){const q=S.jq;if(!q||q.s>2)return;const R=JQ[q.to];
- if(q.s===1){if(d.lv>=S.lv-25){q.p++;if(q.p%10===0||q.p>=R.hunt)log(`🎓 Job Quest: ${q.p}/${R.hunt}`);if(q.p>=R.hunt){q.s=2;q.p=0;banner('Job Quest','Now collect '+R.emb+' Job Emblems'+(R.sh?' and '+R.sh+' Awakening Shards':''),2600);sfx('quest');save();}}}
- else if(q.s===2&&q.p<R.emb&&d.lv>=S.lv-25&&Math.random()<.3){q.p++;log(`🎖️ Job Emblem (${q.p}/${R.emb})`);jqCheck2();}}
-function jqShard(){const q=S.jq;if(!q||q.s!==2||!JQ[q.to].sh)return;q.sh=(q.sh||0)+1;log(`💎 Awakening Shard (${q.sh}/${JQ[q.to].sh})`);bigText('AWAKENING SHARD','#b04aff',1600);jqCheck2();}
+function jqKill(d){const q=S.jq;if(!q)return;if(q.s===2)q.s=1;if(q.s!==1)return;const R=JQ[q.to];
+ q.p++;if(q.p%100===0||q.p>=R.hunt)log(`🎓 Job Quest: ${q.p}/${R.hunt}`);if(q.p>=R.hunt){q.s=3;q.p=R.hunt;banner('Job Quest complete!','Return to Job Master Orin for the Trial',3000);sfx('quest');save();}}
+function jqShard(){return;const q=S.jq;if(!q||q.s!==2||!JQ[q.to].sh)return;q.sh=(q.sh||0)+1;log(`💎 Awakening Shard (${q.sh}/${JQ[q.to].sh})`);bigText('AWAKENING SHARD','#b04aff',1600);jqCheck2();}
 function jqCheck2(){const q=S.jq,R=JQ[q.to];if(q.s===2&&q.p>=R.emb&&(q.sh||0)>=R.sh){q.s=3;banner('Job Quest','Return to Job Master Orin for the Trial',3000);sfx('quest');save();}}
 
 /* ---- the trial: fight your own shadow ---- */
@@ -2720,6 +3047,130 @@ function partyHud(){let el=$('#ptF');if(!el)return;const m=FB.uid&&typeof myPart
  el.innerHTML=m.map(u=>{const v=FB.pres[u]||{},p=NET.peers[u];const live=p&&livePeer(p);const C=CLASSES[v.c];const out=NET.duel&&NET.duel.team&&NET.duel.outs&&NET.duel.outs[u];
   const hp=live?p.hp:null;const dead=live&&(p.dead||out);const col=hp==null?'#555':hp>50?'#4ccf6a':hp>25?'#e8c24a':'#e04a4a';
   return `<div class="ptr"><div class="ptn">${C?C.ic:''} ${esc(v.n||'?')} <span style="color:#ffd76a">${v.l||''}</span>${dead?' 💀':''}</div>${live?`<div class="ptb"><i style="width:${dead?0:hp}%;background:${col}"></i></div>`:`<div class="pto">${v.ch>=0?(String(v.w||'').startsWith('dg_')?'⚔️ dungeon':'Ch.'+(v.ch+1)):'offline'}</div>`}</div>`;}).join('');}
+/* ================= NEW WORLD: CO-OP BOSS RULES · COMPANIONS · GRAVITY ================= */
+const momOf=k=>k==='L'?'Essa':'Liza';
+const ALLY_DEF=[
+ {n:'Isaac',hk:'L',cls:'knight',cu:{style:'spiky',hair:0x1a1010,outfit:0xa82a2a}},
+ {n:'Lucas',hk:'L',cls:'knight',cu:{style:'short',hair:0x6a4a2a,outfit:0x4a5a6a}},
+ {n:'Kamara',hk:'C',cls:'knight',cu:{style:'long',hair:0x1a1010,outfit:0x7a3a5a}},
+ {n:'Kim',hk:'C',cls:'assassin',cu:{style:'pony',hair:0x2a1010,outfit:0xc83a3a}},
+ {n:'Ethan',hk:'L',cls:'wizard',cu:{style:'short',hair:0x0a0a10,outfit:0x2a4aa8}}];
+G.allies=[];G.rallies={};
+
+/* ---------- boss spawning for every chapter (single, twins, trio, chains, seals) ---------- */
+function spawnChapterBoss(c){const ch=CHS[c],lv=chLevel(c)+6+(S.ngp||0)*20;
+ const mk=(key,x,z)=>{const d=bossBoost(bossDef(key,lv));const m=mkMob(d,x,z,true);m.agg=false;m.face=Math.PI;m.baseMhp=m.mhp;m.coopN=1;G.mobs.push(m);return m;};
+ const t=BOSSES[ch.boss]&&BOSSES[ch.boss].mech&&BOSSES[ch.boss].mech.t;let main;
+ if(t==='twin'){main=mk('twinkael',AR.x-4.5,AR.z-7);mk('twinseth',AR.x+4.5,AR.z-7);}
+ else if(t==='trio'){main=mk('calflame',AR.x,AR.z-9);mk('calfrost',AR.x-7,AR.z-4);mk('calstorm',AR.x+7,AR.z-4);}
+ else main=mk(ch.boss,AR.x,AR.z-8);
+ if(t==='chains')spawnAnchors(lv);
+ G.boss=main;G.anchT=0;G.sealHold=0;
+ if(ch.party)setTimeout(()=>allySync(true),1200);
+ if(t)setTimeout(()=>coopTip(t,ch.party),3800);
+ return main;}
+function coopTip(t,need){const tip={twin:['Linked Souls','When one executioner falls, defeat the other within 10 seconds'],chains:['Chained Colossus','Break all 3 anchors within 12 seconds of each other, then strike'],
+ channel:['Soul Harvest','When she channels, 3 fighters must hit her before the cast ends'],trio:['Three Calamities','Pull them apart! Close together they protect each other'],
+ seals:['The Five Seals','Hold all 5 glowing seals at once to break the Warden\'s shield'],sync:['Gravity Shield',need+' fighters must hit within 2.5 seconds of each other']}[t];
+ if(tip)hEmit({y:'bn',a:'🤝 '+tip[0],b:tip[1],d:4200},e=>banner(e.a,e.b,e.d));}
+function spawnAnchors(lv){const d0=mobDef('chainanchor',lv);G.anchors=[];for(let i=0;i<3;i++){const a=i/3*6.283+Math.PI/2;const d=Object.assign({},d0,{hp:Math.round(d0.hp*6),atk:1,aggro:0,spd:0});
+  const m=mkMob(d,AR.x+Math.cos(a)*10,AR.z+Math.sin(a)*10,false);m.anchor=1;m.cd=1e9;m.agg=false;m.wave=true;G.mobs.push(m);G.anchors[i]={x:m.x,z:m.z,id:m.id};}}
+
+/* ---------- the teamwork rule: decides how much of a hit gets through (host / offline) ---------- */
+function gText(m,s){if((m.gtT||0)>G.t)return;m.gtT=G.t+.6;txt(m.x,gY(m.x,m.z)+m.mdl.h*(m.d.s||1)+.9,m.z,s,'#c8b8ff',true);}
+function trioOthersNear(m){return G.mobs.some(o=>o!==m&&!o.dead&&o.d.mech&&o.d.mech.t==='trio'&&dxz(o,m)<8);}
+function gateDmg(m,dmg,who){const g=m.d.mech;if(!g||m.anchor)return dmg;m.hb=m.hb||{};m.hb[who]=G.t;
+ if(g.t==='sync'){const n=Object.values(m.hb).filter(t=>G.t-t<2.5).length;if(n<g.need){m.immT=G.t+.8;gText(m,`🌀 SHIELD ${n}/${g.need}`);return 0;}if((m.syncT||0)<G.t){m.syncT=G.t+3;gText(m,'💥 SHIELD BROKEN');}return dmg;}
+ if(g.t==='twin'){if(m.down){gText(m,'💤 DOWN');return 0;}if(m.hp-dmg<=0){const o=G.mobs.find(x=>x!==m&&x.boss&&!x.dead&&x.d.mech&&x.d.mech.t==='twin');
+   if(o&&!o.down){m.down=G.t;m.hp=1;m.immT=G.t+10;hEmit({y:'bn',a:m.d.n+' has fallen!',b:'Defeat '+o.d.n+' within 10 seconds!',d:2600},e=>banner(e.a,e.b,e.d));sfx('stagger');return 0;}
+   if(o&&o.down){o.hp=0;killMob(o);}}return dmg;}
+ if(g.t==='chains'){if(G.mobs.some(a=>a.anchor&&!a.dead)){m.immT=G.t+.8;gText(m,'⛓️ CHAINED');return 0;}return dmg;}
+ if(g.t==='trio'){if(trioOthersNear(m)){m.immT=G.t+.8;gText(m,'🛡️ PROTECTED');return Math.max(1,Math.round(dmg*.12));}return dmg;}
+ if(g.t==='seals'){if(!((m.sealOpen||0)>G.t)){m.immT=G.t+.8;gText(m,'🔒 SEALED');return 0;}return dmg;}
+ if(g.t==='channel'){if(m.chan)m.chan.hb[who]=1;return (m.vuln||0)>G.t?Math.round(dmg*1.5):dmg;}
+ return dmg;}
+
+/* ---------- per-frame rules (host / offline) ---------- */
+function seals(){if(!G.sealPos){G.sealPos=[];for(let i=0;i<5;i++){const a=Math.PI/2+i/5*6.283;G.sealPos.push({x:AR.x+Math.cos(a)*9,z:AR.z+Math.sin(a)*9});}}return G.sealPos;}
+function sealBuild(){if(G.sealObj)G.sealObj.forEach(o=>world.remove(o));G.sealObj=[];if(!(CHS[S.ch].boss&&BOSSES[CHS[S.ch].boss].mech&&BOSSES[CHS[S.ch].boss].mech.t==='seals')||G.dg)return;G.sealPos=null;
+ for(const s of seals()){const g=grp(s.x,gY(s.x,s.z),s.z);const r=mesh(RING(1.3,1.8),basic(0xffd76a,{transparent:true,opacity:.35,side:T.DoubleSide,depthWrite:false}),0,.08,0);r.rotation.x=-Math.PI/2;r.castShadow=false;g.add(r);
+  const p=mesh(CYL(.25,.35,1.2,6),mat(0x8a7a3a,{emissive:0x2a2000}),0,.6,0);g.add(p);const gl=glowSprite(0xffd76a,1.8);gl.position.y=1.5;gl.material.opacity=.3;g.add(gl);g.userData={r,gl};world.add(g);G.sealObj.push(g);}}
+function sealVis(){if(!G.sealObj||!G.sealObj.length)return;const ps=players();if(NET.on&&!NET.host)for(const n in G.rallies){const a=G.rallies[n];if(a.x!=null)ps.push({x:a.x,z:a.z});}
+ G.sealObj.forEach((g,i)=>{const s=G.sealPos[i];const on=ps.some(p=>Math.hypot(p.x-s.x,p.z-s.z)<1.9);g.userData.r.material.opacity=on?.85:.3;g.userData.gl.material.opacity=on?.9:.25;g.userData.r.material.color.setHex(on?0x8affc8:0xffd76a);});}
+function mechTick(dt){if(!G.bossFight)return;const bs=G.mobs.filter(m=>m.boss&&!m.dead&&m.d.mech);
+ for(const m of bs){const g=m.d.mech;
+  if(g.t==='twin'&&m.down&&G.t-m.down>10){m.down=0;m.hp=Math.round(m.mhp*.5);m.immT=0;hEmit({y:'bn',a:m.d.n+' rises again!',b:'Too slow. Bring them down together.',d:2400},e=>banner(e.a,e.b,e.d));fxRing(m.x,m.z,4,0xff3a3a,.8);}
+  if(g.t==='twin'&&m.down)m.stun=.3;
+  if(g.t==='channel'&&m.agg){if(!m.chan){m.chT=(m.chT==null?14:m.chT)-dt;if(m.chT<=0){m.chan={t:5.5,hb:{}};cancelWind(m);hEmit({y:'bn',a:'💀 SOUL HARVEST',b:'3 fighters must hit her NOW!',d:2600},e=>{banner(e.a,e.b,e.d);sfx('charge');});}}
+   else{m.stun=.3;m.chan.t-=dt;if(Math.random()<.3)PS.burst(m.x,gY(m.x,m.z)+2,m.z,3,0xd06aff,{sp:3,up:2,g:-1});const n=Object.keys(m.chan.hb).length;
+    if(n>=g.need){m.chan=null;m.chT=22;m.stag=3;m.ripT=3;m.vuln=G.t+8;hEmit({y:'bn',a:'✨ Interrupted!',b:'The Soul Queen is vulnerable for 8 seconds',d:2400},e=>{banner(e.a,e.b,e.d);sfx('stagger');});}
+    else if(m.chan.t<=0){m.chan=null;m.chT=22;hEmit({y:'dc',id:m.id,x:Math.round(AR.x),z:Math.round(AR.z),r:AR.r+2,dur:.5,dmg:Math.round(m.d.atk*2.4),arc:0,rot:0,ar:1},decalLocal);}}}
+  if(g.t==='seals'){const ps=players();const occ=seals().every(s=>ps.some(p=>Math.hypot(p.x-s.x,p.z-s.z)<1.9));
+   if(occ&&!((m.sealOpen||0)>G.t)){G.sealHold+=dt;if(G.sealHold>=3){G.sealHold=0;m.sealOpen=G.t+12;m.stag=2;hEmit({y:'bn',a:'🔓 The seals are broken!',b:'Strike the Warden for 12 seconds!',d:2400},e=>{banner(e.a,e.b,e.d);sfx('gate');});}}else if(!occ)G.sealHold=0;}}
+ // chain anchors must break close together
+ if(G.anchors&&G.anchors.length&&bs.some(m=>m.d.mech.t==='chains')){const alive=G.mobs.filter(a=>a.anchor&&!a.dead);
+  if(alive.length&&alive.length<3){if(!G.anchT)G.anchT=G.t;if(G.t-G.anchT>12){G.anchT=0;const lv=alive[0].d.lv;for(const s of G.anchors){if(G.mobs.some(a=>a.anchor&&!a.dead&&Math.hypot(a.x-s.x,a.z-s.z)<.5))continue;
+     const d0=mobDef('chainanchor',lv);const d=Object.assign({},d0,{hp:Math.round(d0.hp*6),atk:1,aggro:0,spd:0});const m=mkMob(d,s.x,s.z,false);m.anchor=1;m.cd=1e9;m.agg=false;m.wave=true;G.mobs.push(m);fxRing(s.x,s.z,2.5,0xc8c8ff,.6);}
+    hEmit({y:'bn',a:'⛓️ The chains reform!',b:'Break all 3 anchors within 12 seconds',d:2400},e=>banner(e.a,e.b,e.d));}}
+  else if(!alive.length&&G.anchT!==-1){G.anchT=-1;hEmit({y:'bn',a:'⛓️ Chains broken!',b:'The Colossus can be hurt now',d:2400},e=>{banner(e.a,e.b,e.d);sfx('gate');});}}
+ // companions follow the party size
+ G.alT=(G.alT||0)+dt;if(G.alT>1){G.alT=0;allySync(false);}}
+function mechVis(m){const imm=(m.immT||0)>G.t||m.nImm;if(!m.mdl.shieldS&&imm){const s=mesh(SPH(1,14,10),basic(0x9a7aff,{transparent:true,opacity:.18,depthWrite:false}));s.castShadow=false;s.scale.setScalar(m.d.r*1.5/(m.d.s||1));s.position.y=m.mdl.h*.5;m.mdl.root.add(s);m.mdl.shieldS=s;}
+ if(m.mdl.shieldS){m.mdl.shieldS.visible=!!imm;m.mdl.shieldS.material.opacity=.14+Math.sin(G.t*6)*.06;}}
+
+/* ---------- gravity pull ---------- */
+DG_SP.grav=(m,tg,big,r1)=>{m.rT=2.4;hEmit({y:'pull',x:r1(m.x),z:r1(m.z),dur:1.4},pullLocal);setTimeout(()=>{if(!m.dead)big(1.9,6.5,m.x,m.z,.55);},1400);};
+function pullLocal(e){if(Math.hypot(hero.x-e.x,hero.z-e.z)>AR.r+6)return;G.pull={x:e.x,z:e.z,t:e.dur};bigText('GRAVITY!','#b06aff',1200);sfx('charge');fxRing(e.x,e.z,8,0x8a4aff,1);}
+function pullTick(dt){const p=G.pull;if(!p)return;p.t-=dt;if(p.t<=0){G.pull=null;return;}if(hero.dead||hero.state==='roll')return;const dx=p.x-hero.x,dz=p.z-hero.z,d=Math.hypot(dx,dz);if(d<1.5)return;
+ hero.x+=dx/d*4.2*dt;hero.z+=dz/d*4.2*dt;if(Math.random()<.4)PS.burst(hero.x,hero.y+.5,hero.z,1,0x8a4aff,{sp:1,up:1});}
+
+/* ---------- companions (host / offline only; mirrored to other players) ---------- */
+function realInArena(){let n=G.bossFight&&!hero.dead?1:0;if(NET.on)for(const p of Object.values(NET.peers))if(livePeer(p)&&p.ar&&!p.dead)n++;return n;}
+function allySync(first){const c=S.ch,ch=CHS[c];if(isPuppet()||G.dg)return;const bossAlive=G.mobs.some(m=>m.boss&&!m.dead);
+ const want=ch.party&&G.bossFight&&bossAlive&&realInArena()>0?Math.max(0,Math.min(4,ch.party-realInArena())):0;
+ while(G.allies.length>want){const a=G.allies.pop();allyRemove(a);}
+ while(G.allies.length<want){const def=ALLY_DEF[G.allies.length];const a=allyMake(def,hero.x+rnd(-2,2),hero.z+2+rnd(0,1.5));G.allies.push(a);if(!first)log('🤝 '+def.n+' joins the fight!');}
+ if(first&&G.allies.length)log('🤝 '+G.allies.map(a=>a.n).join(', ')+' fight beside you!');}
+function allyMake(def,x,z){const M=buildHero(def.hk,def.cls,{w:{slot:'w',tier:4,rar:2,ref:4},a:{slot:'a',tier:3,rar:2,ref:0},s:CLASSES[def.cls].shield?{slot:'s',tier:3,rar:2,ref:0}:null},{cust:def.cu,job:2});world.add(M.root);
+ const lbl=document.createElement('div');lbl.className='lbl';$('#fl').appendChild(lbl);
+ return {n:def.n,def,M,lbl,x,z,face:0,state:'idle',actT:0,actDur:1,moveAmt:0,combo:0,cd:rnd(.5,1.2),hitDone:true,ranged:def.cls==='wizard'};}
+function allyRemove(a){world.remove(a.M.root);if(a.lbl)a.lbl.remove();}
+function alliesClear(){G.allies.forEach(allyRemove);G.allies=[];for(const n in G.rallies)allyRemove(G.rallies[n]);G.rallies={};}
+function allyTarget(a,i){const bs=G.mobs.filter(m=>m.boss&&!m.dead);if(!bs.length)return null;const b0=bs[0],t=b0.d.mech&&b0.d.mech.t;
+ if(t==='seals'&&!((b0.sealOpen||0)>G.t)){const ps=players().filter(p=>!p.ally);const free=seals().filter(s=>!ps.some(p=>Math.hypot(p.x-s.x,p.z-s.z)<1.9));const s=free[i%Math.max(1,free.length)];if(s)return {x:s.x,z:s.z,stand:1};}
+ if(t==='chains'){const an=G.mobs.filter(m=>m.anchor&&!m.dead);if(an.length){const all=an.every(m=>m.hp<m.mhp*.35);const m=an[i%an.length];return {m,hold:!all};}}
+ if(t==='twin'){const up=bs.filter(m=>!m.down);const far=up.sort((p,q)=>dxz(q,hero)-dxz(p,hero));return {m:far[i%far.length]||bs[0]};}
+ if(t==='trio')return {m:bs.sort((p,q)=>dxz(q,hero)-dxz(p,hero))[i%bs.length]};
+ return {m:b0};}
+function allyTick(dt){if(!G.allies.length)return;G.alS=(G.alS||0)+dt;
+ G.allies.forEach((a,i)=>{const T=allyTarget(a,i);a.actT+=dt;a.cd-=dt;let tx=a.x,tz=a.z;
+  if(T&&T.stand){tx=T.x;tz=T.z;}else if(T&&T.m){const m=T.m,ang=i*1.6+G.t*.15,rr=a.ranged?8:m.r+1.6;tx=m.x+Math.sin(ang)*rr;tz=m.z+Math.cos(ang)*rr;
+   const d=dxz(a,m);if(d<(a.ranged?10:m.r+2.6)){a.face=turnTo(a.face,Math.atan2(m.x-a.x,m.z-a.z),dt*10);
+    if(a.cd<=0&&!(T.hold&&m.hp<m.mhp*.35)&&!(m.d.mech&&m.d.mech.t==='twin'&&m.down&&!G.mobs.some(o=>o!==m&&o.boss&&!o.dead&&o.down))){a.cd=rnd(1,1.4);a.state='light';a.actT=0;a.actDur=.5;a.combo=(a.combo+1)%3;a.hitDone=false;a.tg=m;}}}
+  if(!a.hitDone&&a.actT>.22){a.hitDone=true;const m=a.tg;if(m&&!m.dead)allyHit(a,m);}
+  if(a.actT>a.actDur&&a.state!=='idle'&&a.state!=='move')a.state='idle';
+  const dx=tx-a.x,dz=tz-a.z,dd=Math.hypot(dx,dz);if(dd>.4&&(a.state==='idle'||a.state==='move')){const sp=Math.min(dd,5.8*dt);a.x+=dx/dd*sp;a.z+=dz/dd*sp;a.face=turnTo(a.face,Math.atan2(dx,dz),dt*8);a.state='move';a.moveAmt=lerp(a.moveAmt,1,.2);}else{a.moveAmt=lerp(a.moveAmt,0,.2);if(a.state==='move')a.state='idle';}
+  a.x=clamp(a.x,AR.x-AR.r+1,AR.x+AR.r-1);a.z=clamp(a.z,AR.z-AR.r+1,AR.z+AR.r-1);
+  animRig(a.M,a,CLASSES[a.def.cls],dt);jobAnim(a.M,G.t,null);});
+ if(NET.on&&NET.host&&G.alS>.25){G.alS=0;NET.base.child('meta/al').set(G.allies.map(a=>[a.n,Math.round(a.x*10),Math.round(a.z*10),Math.round(a.face*100),PST.indexOf(a.state)])).catch(()=>{});}}
+function allyHit(a,m){const st=G.st;const col=JOB_COL[a.def.cls];
+ if(a.ranged){fxSpark(m.x,gY(m.x,m.z)+1.4,m.z,col,1.4);fxRing(m.x,m.z,1.2,col,.3);}else fxSlash(a.x+Math.sin(a.face)*.8,a.z+Math.cos(a.face)*.8,a.face,col,false,2.4);
+ let dmg=Math.max(1,Math.round(st.atk*.5*rnd(.9,1.1)*(100/(100+m.d.def))));dmg=gateDmg(m,dmg,'ally_'+a.n);if(dmg<=0)return;
+ m.hp-=dmg;m.flash=.1;m.agg=true;txt(m.x,gY(m.x,m.z)+m.mdl.h*(m.d.s||1)*.9+.3,m.z,dmg,'#9ad8ff',false);if(m.hp<=0)killMob(m);}
+function alliesFromNet(arr){if(!NET.on||NET.host)return;const seen={};(arr||[]).forEach(r=>{const n=r[0];seen[n]=1;let a=G.rallies[n];
+  if(!a){const def=ALLY_DEF.find(d=>d.n===n);if(!def)return;a=allyMake(def,r[1]/10,r[2]/10);G.rallies[n]=a;}
+  a.tx=r[1]/10;a.tz=r[2]/10;a.tf=r[3]/100;const st=PST[r[4]]||'idle';if(st!==a.state&&st==='light'){a.actT=0;a.actDur=.5;}a.state=st;});
+ for(const n in G.rallies)if(!seen[n]){allyRemove(G.rallies[n]);delete G.rallies[n];}}
+function ralliesTick(dt){for(const n in G.rallies){const a=G.rallies[n];if(a.tx==null)continue;const ox=a.x,oz=a.z;a.x=lerp(a.x,a.tx,Math.min(1,dt*9));a.z=lerp(a.z,a.tz,Math.min(1,dt*9));a.face=turnTo(a.face,a.tf,dt*10);a.actT+=dt;
+  a.moveAmt=lerp(a.moveAmt,clamp(Math.hypot(a.x-ox,a.z-oz)/Math.max(dt,.001)/6,0,1),.25);if(a.state==='light'&&a.actT>.22&&!a.fx){a.fx=1;fxSpark(a.x+Math.sin(a.face)*1.2,gY(a.x,a.z)+1.2,a.z+Math.cos(a.face)*1.2,JOB_COL[a.def.cls],1);}if(a.state!=='light')a.fx=0;
+  animRig(a.M,a,CLASSES[a.def.cls],dt);jobAnim(a.M,G.t,null);}}
+function alliesOverlay(){const all=G.allies.concat(Object.values(G.rallies));for(const a of all){if(!a.lbl)continue;const s=toScreen(a.x,gY(a.x,a.z)+2.7,a.z);a.lbl.style.display=s.vis?'':'none';a.lbl.style.left=s.x+'px';a.lbl.style.top=s.y+'px';a.lbl.innerHTML=`<span style="color:#9ad8ff">🤝 ${a.n}</span>`;}}
+function coopTick(dt){mechTick(dt);allyTick(dt);pullTick(dt);sealVis();if(!G.bossFight&&G.allies.length)alliesClear();}
+
+/* ---------- Chapter 50 finale ---------- */
+function newDawnFinale(){const c=S.ch;S.q[c].s=3;S.cleared[c]=1;S.done2=1;S.bk=(S.bk||0);save(true);sfx('ending');
+ for(let i=0;i<30;i++)setTimeout(()=>PS.burst(rnd(-6,6),gY(0,0)+rnd(1,4),rnd(-6,6),3,[0xffd76a,0xffe8b0,0xffffff][i%3],{sp:1,up:3,g:-.5,life:2}),i*160);
+ story(CHS[c].finale||[],()=>{chatSys(`🌅 ${FB.name||heroName()} saved Eldoria and finished all ${CHS.length} chapters!`);startEnding('dawn');});}
 /* ================= FLOW ================= */
 function goFull(){try{const d=document.documentElement;const p=d.requestFullscreen?d.requestFullscreen({navigationUI:'hide'}):d.webkitRequestFullscreen?d.webkitRequestFullscreen():null;if(p&&p.then)p.then(()=>{try{screen.orientation.lock('landscape').catch(()=>{});}catch(e){}}).catch(()=>{});}catch(e){}}
 function startGame(){G.mode='game';showScreen('none');showGameUI(true);G.st=stats();if(G.npcLbl)G.npcLbl.style.display='';}
@@ -2741,14 +3192,16 @@ function toTitle(){netLeave();G.dg=null;if(NET.duel)NET.duel=null;G.mode='title'
 function initHero(){G.st=stats();Object.assign(hero,{hp:G.st.mhp,sp:G.st.msp,sta:G.st.msta,cd:[0,0,0,0,0],dead:false,buffs:{},lock:null,flask:S.flask,state:'idle'});}
 function newGame(hk,ck,cust,df,fac){freshSave(hk,ck,cust,df);S.fac=fac;initHero();loadChapter(0);startGame();save();story(CHS[0].intro,()=>{titleCard(0);save();});}
 async function continueGame(s){S=s||loadSave();if(S&&S.diff==null)S.diff=2;if(S&&!facOf(S)){const r=await ask('Choose your Faction<br><small>It will show next to your name and on the leaderboard.</small>',FACTIONS.map(f=>f.e+' '+f.n));S.fac=FACTIONS[r].k;}if(!S)return;if(!S.q){toast('Old save is not compatible. Please start a new game.');S=null;return;}if(!S.sk){S.v=3;S.sk={};S.bar=[null,null,null,null];S.skp=S.lv;toast('Skill tree added: you have '+S.skp+' skill points to spend!',3000);}
- S.job=S.job||0;while(S.bar.length<6)S.bar.push(null);skSync();
+ S.job=S.job||0;while(S.bar.length<6)S.bar.push(null);skSync();while(S.cleared.length<CHS.length)S.cleared.push(0);while(S.q.length<CHS.length)S.q.push({s:0,p:0,shr:[0,0,0]});
+ if(S.done&&S.unlocked<20){S.unlocked=20;setTimeout(()=>banner('🌍 The New World is open!','Chapter 21 unlocked: open ☰ Menu → World Map',4200),2500);}
  if((S.v||3)<4){S.v=4;S.lv=Math.min(S.lv,LV_MAX);S.st=Object.assign({},CLASSES[S.cls].base);S.pts=S.lv-1;setTimeout(()=>ask('⚖️ <b>New stat rules</b><br>1 stat point per level · every stat caps at <b>99</b> · max level <b>594</b> (6 × 99).<br><br>Your stats were reset and you got <b>'+S.pts+' points</b> back. Open ☰ Menu → Status to assign them.',['OK']),1500);}initHero();loadChapter(S.ch);startGame();titleCard(S.ch);}
-function startEnding(){G.mode='ending';showGameUI(false);G.mobs.forEach(removeMob);G.mobs=[];if(G.cage)world.remove(G.cage);
+function startEnding(kind){G.endKind=kind||'';G.mode='ending';showGameUI(false);G.mobs.forEach(removeMob);G.mobs=[];if(G.cage)world.remove(G.cage);
  const pm=buildHero(partnerKey(),partnerKey()==='L'?'knight':'priest',{w:{tier:2,rar:2,ref:0,slot:'w'},a:{tier:1,rar:1,ref:0,slot:'a'},s:{tier:1,rar:1,ref:0,slot:'s'}});
  hero.x=AR.x-.7;hero.z=AR.z;hero.face=Math.PI/2;hero.state='idle';hero.dead=false;pm.root.position.set(AR.x+.9,gY(AR.x+.9,AR.z),AR.z);pm.root.rotation.y=-Math.PI/2;world.add(pm.root);G.endPartner=pm;syncHero();sfx('ending');musicFor(0,false);
  for(let i=0;i<40;i++)setTimeout(()=>PS.burst(AR.x+rnd(-4,4),gY(AR.x,AR.z)+rnd(0,3),AR.z+rnd(-4,4),3,[0xffd76a,0xff8ac0,0xffffff][i%3],{sp:1,up:2,g:-.5,life:2}),i*150);
- $('#endTxt').innerHTML=`${heroName()} the ${C_().n} rescued ${partnerName()} after 20 chapters!<br>Final level ${S.lv} · 💰 ${S.zeny.toLocaleString()} zeny · ${Math.round(S.play/60)} minutes played`;showScreen('endScr');}
-$('#endCont').onclick=()=>{if(G.endPartner)world.remove(G.endPartner.root);G.endPartner=null;S.ngp++;S.unlocked=0;for(let i=0;i<20;i++){S.cleared[i]=0;S.q[i]={s:0,p:0,shr:[0,0,0]};}S.done=0;startGame();loadChapter(0);toast('New Game+ '+S.ngp+': enemies are '+(S.ngp*20)+' levels stronger. Your gear and level carry over.',3500);save();};
+ $('#endNew').style.display=kind==='dawn'?'none':'';$('#endTxt').innerHTML=(kind==='dawn'?`Ava is free and Eldoria shines again.<br>${heroName()} the ${jobName()} finished all ${CHS.length} chapters!`:`${heroName()} the ${jobName()} rescued ${partnerName()} after 20 chapters!<br><b style="color:#c9a0ff">But the rift still glows... a New World awaits.</b>`)+`<br>Final level ${S.lv} · 💰 ${S.zeny.toLocaleString()} zeny · ${Math.round(S.play/60)} minutes played`;showScreen('endScr');}
+$('#endCont').onclick=()=>{if(G.endPartner)world.remove(G.endPartner.root);G.endPartner=null;S.ngp++;S.unlocked=0;for(let i=0;i<CHS.length;i++){S.cleared[i]=0;S.q[i]={s:0,p:0,shr:[0,0,0]};}S.done=0;S.done2=0;startGame();loadChapter(0);toast('New Game+ '+S.ngp+': enemies are '+(S.ngp*20)+' levels stronger. Your gear and level carry over.',3500);save();};
+$('#endNew').onclick=()=>{if(G.endPartner)world.remove(G.endPartner.root);G.endPartner=null;S.unlocked=Math.max(S.unlocked,20);startGame();loadChapter(20);titleCard(20);story(CHS[20].intro);save(true);};
 $('#endTitle').onclick=()=>{if(G.endPartner)world.remove(G.endPartner.root);G.endPartner=null;toTitle();};
 
 /* select screen preview */
